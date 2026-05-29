@@ -1045,30 +1045,46 @@
       return scaleRect.top - stageRect.top + scaleRect.height / 2;
     }
 
-    function drawTrailLine(x, y, color, length, alpha = 0.84) {
-      const tailLength = length * 1.9;
-      const gradient = trailContext.createLinearGradient(x, y - tailLength, x, y + length / 2);
-      gradient.addColorStop(0, 'rgba(128, 221, 0, 0)');
-      gradient.addColorStop(0.62, color);
-      gradient.addColorStop(1, color);
-
+    function drawTrailConnections(notes) {
+      if (notes.length < 2) return;
       trailContext.save();
       trailContext.lineCap = 'round';
-      trailContext.strokeStyle = gradient;
+      trailContext.lineJoin = 'round';
+      trailContext.strokeStyle = 'rgba(128, 221, 0, 0.62)';
+      trailContext.shadowColor = 'rgba(128, 221, 0, 0.85)';
+      trailContext.shadowBlur = 8;
+      trailContext.globalAlpha = 0.58;
+      trailContext.lineWidth = 2;
+      trailContext.beginPath();
+      notes.forEach((note, index) => {
+        if (index === 0) trailContext.moveTo(note.x, note.y);
+        else trailContext.lineTo(note.x, note.y);
+      });
+      trailContext.stroke();
+      trailContext.globalAlpha = 0.16;
+      trailContext.lineWidth = 6;
+      trailContext.beginPath();
+      notes.forEach((note, index) => {
+        if (index === 0) trailContext.moveTo(note.x, note.y);
+        else trailContext.lineTo(note.x, note.y);
+      });
+      trailContext.stroke();
+      trailContext.restore();
+    }
+
+    function drawTrailPoint(x, y, color, alpha = 0.84) {
+      trailContext.save();
       trailContext.shadowColor = color;
       trailContext.shadowBlur = 12;
       trailContext.globalAlpha = alpha;
-      trailContext.lineWidth = 2;
+      trailContext.fillStyle = color;
       trailContext.beginPath();
-      trailContext.moveTo(x, y - tailLength);
-      trailContext.lineTo(x, y + length / 2);
-      trailContext.stroke();
-      trailContext.globalAlpha = alpha * 0.24;
-      trailContext.lineWidth = 4;
+      trailContext.arc(x, y, 3.2, 0, Math.PI * 2);
+      trailContext.fill();
+      trailContext.globalAlpha = alpha * 0.22;
       trailContext.beginPath();
-      trailContext.moveTo(x, y - tailLength);
-      trailContext.lineTo(x, y + length / 2);
-      trailContext.stroke();
+      trailContext.arc(x, y, 8, 0, Math.PI * 2);
+      trailContext.fill();
       trailContext.restore();
     }
 
@@ -1076,8 +1092,10 @@
       if (!trailWidth || !trailHeight) resizePitchTrail();
       const rect = pitchTrail.getBoundingClientRect();
       trailContext.clearRect(0, 0, rect.width, rect.height);
-      trailNotes.forEach((note) => {
-        drawTrailLine(note.x, note.y, note.color, TRAIL_NOTE_LENGTH, note.alpha);
+      const visibleNotes = [...trailNotes].sort((a, b) => a.y - b.y);
+      drawTrailConnections(visibleNotes);
+      visibleNotes.forEach((note) => {
+        drawTrailPoint(note.x, note.y, note.color, note.alpha);
       });
     }
 
