@@ -93,6 +93,17 @@
       padding: 0;
     }
 
+    .pitch-trail {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.7;
+      mix-blend-mode: screen;
+    }
+
     .tuning-switch {
       position: absolute;
       z-index: 8;
@@ -723,6 +734,8 @@
 <body>
   <main class="phone">
     <div class="stage">
+      <canvas class="pitch-trail" id="pitchTrail" aria-hidden="true"></canvas>
+
       <div class="tuning-switch" aria-label="G string mode">
         <button id="highG" class="active" type="button">High G</button>
         <button id="lowG" type="button">Low G</button>
@@ -839,6 +852,8 @@
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
     const scaleTicks = document.querySelector('#scaleTicks');
+    const pitchTrail = document.querySelector('#pitchTrail');
+    const trailContext = pitchTrail.getContext('2d');
 
     let audioContext;
     let analyser;
@@ -851,6 +866,13 @@
     let stringSet = STRINGS_HIGH_G;
     let recentPitches = [];
     let lastGoodPitchAt = 0;
+    let lastValidPitchAt = 0;
+    let lastTrailSegmentAt = 0;
+    let lastTrailFrameAt = 0;
+    let lastRms = 0;
+    let trailWidth = 0;
+    let trailHeight = 0;
+    let trailDpr = 1;
     const MIN_INPUT_RMS = 0.0009;
     const MIN_FREQUENCY = 150;
     const MAX_FREQUENCY = 560;
@@ -863,6 +885,11 @@
     const TICK_STEP_CENTS = 5;
     const PREAMP_GAIN = 2.2;
     const SUSTAIN_HOLD_MS = 2600;
+    const TRAIL_COLORS = {
+      green: '#80dd00',
+      yellow: '#ffd24a',
+      red: '#ff4d3f'
+    };
     let tickMarks = [];
 
     function centsOff(frequency, target) {
@@ -937,6 +964,84 @@
       clearTickHighlight();
     }
 
+    function resizePitchTrail() {
+      const rect = pitchTrail.getBoundingClientRect();
+      const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+      const nextWidth = Math.max(1, Math.round(rect.width * nextDpr));
+      const nextHeight = Math.max(1, Math.round(rect.height * nextDpr));
+
+      if (nextWidth === trailWidth && nextHeight === trailHeight && nextDpr === trailDpr) return;
+
+      trailDpr = nextDpr;
+      trailWidth = nextWidth;
+      trailHeight = nextHeight;
+      pitchTrail.width = trailWidth;
+      pitchTrail.height = trailHeight;
+      trailContext.setTransform(trailDpr, 0, 0, trailDpr, 0, 0);
+      trailContext.clearRect(0, 0, rect.width, rect.height);
+    }
+
+    function scrollPitchTrail(now) {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+      if (!lastTrailFrameAt) lastTrailFrameAt = now;
+
+      const delta = clamp((now - lastTrailFrameAt) * 0.026 * trailDpr, 0, 2.6 * trailDpr);
+      lastTrailFrameAt = now;
+      if (delta <= 0) return;
+
+      trailContext.save();
+      trailContext.setTransform(1, 0, 0, 1, 0, 0);
+      trailContext.globalCompositeOperation = 'source-over';
+      trailContext.drawImage(pitchTrail, 0, -delta);
+      trailContext.clearRect(0, trailHeight - delta - 4 * trailDpr, trailWidth, delta + 5 * trailDpr);
+      trailContext.globalCompositeOperation = 'destination-out';
+      trailContext.fillStyle = 'rgba(0, 0, 0, 0.012)';
+      trailContext.fillRect(0, 0, trailWidth, trailHeight);
+      trailContext.restore();
+    }
+
+    function drawPitchSegment(frequency, color, rms) {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+
+      const rect = pitchTrail.getBoundingClientRect();
+      const leftPad = 34;
+      const rightPad = 34;
+      const usableWidth = Math.max(1, rect.width - leftPad - rightPad);
+      const frequencyRatio = clamp((frequency - MIN_FREQUENCY) / (MAX_FREQUENCY - MIN_FREQUENCY), 0, 1);
+      const x = leftPad + frequencyRatio * usableWidth;
+      const y = rect.height - 34;
+      const length = clamp(34 + rms * 900, 34, 92);
+
+      trailContext.save();
+      trailContext.lineCap = 'round';
+      trailContext.strokeStyle = color;
+      trailContext.shadowColor = color;
+      trailContext.shadowBlur = 12;
+      trailContext.globalAlpha = 0.85;
+      trailContext.lineWidth = 2;
+      trailContext.beginPath();
+      trailContext.moveTo(x - length / 2, y);
+      trailContext.lineTo(x + length / 2, y);
+      trailContext.stroke();
+      trailContext.globalAlpha = 0.28;
+      trailContext.lineWidth = 6;
+      trailContext.beginPath();
+      trailContext.moveTo(x - length / 2, y);
+      trailContext.lineTo(x + length / 2, y);
+      trailContext.stroke();
+      trailContext.restore();
+    }
+
+    function maybeDrawPitchSegment(frequency, color, rms, now) {
+      const isNewPluck = now - lastValidPitchAt > 360;
+      const isAttack = rms > 0.004 && rms > lastRms * 1.35;
+      if ((isNewPluck || isAttack) && now - lastTrailSegmentAt > 180) {
+        drawPitchSegment(frequency, color, rms);
+        lastTrailSegmentAt = now;
+      }
+      lastValidPitchAt = now;
+    }
+
     function getSelectedTarget(frequency) {
       if (manualString) {
         return stringSet.find((item) => item.key === manualString);
@@ -968,6 +1073,18 @@
       }
     }
 
+    function pointerColorForCents(cents) {
+      if (Math.abs(cents) <= 5) return 'var(--green)';
+      if (Math.abs(cents) <= 15) return 'var(--yellow)';
+      return 'var(--red)';
+    }
+
+    function trailColorForCents(cents) {
+      if (Math.abs(cents) <= 5) return TRAIL_COLORS.green;
+      if (Math.abs(cents) <= 15) return TRAIL_COLORS.yellow;
+      return TRAIL_COLORS.red;
+    }
+
     function updateReadout(frequency) {
       const target = getSelectedTarget(frequency);
       const cents = centsOff(frequency, target.freq);
@@ -975,7 +1092,7 @@
       const isInTune = Math.abs(cents) <= 5;
       const isNear = Math.abs(cents) <= 15;
       const isFar = Math.abs(cents) > METER_FADE_CENTS;
-      const pointerColor = isInTune ? 'var(--green)' : isNear ? 'var(--yellow)' : 'var(--red)';
+      const pointerColor = pointerColorForCents(cents);
       const pointerPosition = meterPosition(limited);
 
       setActiveString(target.key);
@@ -1071,6 +1188,8 @@
     }
 
     function loop() {
+      const now = performance.now();
+      scrollPitchTrail(now);
       analyser.getFloatTimeDomainData(buffer);
       const rms = getRms(buffer);
       updateLevel(rms);
@@ -1080,6 +1199,9 @@
         const smoothedPitch = stablePitch(pitch);
         if (isNearUkuleleString(smoothedPitch)) {
           updateReadout(smoothedPitch);
+          const target = getSelectedTarget(smoothedPitch);
+          const cents = centsOff(smoothedPitch, target.freq);
+          maybeDrawPitchSegment(smoothedPitch, trailColorForCents(cents), rms, now);
         } else {
           direction.textContent = 'Play an open ukulele string';
           clearPointerState();
@@ -1099,6 +1221,7 @@
         }
       }
 
+      lastRms = rms;
       rafId = requestAnimationFrame(loop);
     }
 
@@ -1149,6 +1272,7 @@
       gainNode = null;
       recentPitches = [];
       lastGoodPitchAt = 0;
+      lastValidPitchAt = 0;
       direction.textContent = 'Play an open string';
       clearPointerState();
       updateLevel(0);
@@ -1185,7 +1309,10 @@
       if (!mediaStream) startMic();
     }, { passive: true });
 
+    window.addEventListener('resize', resizePitchTrail);
+
     buildScaleTicks();
+    resizePitchTrail();
     startMic();
   </script>
 </body>
