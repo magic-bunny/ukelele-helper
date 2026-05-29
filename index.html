@@ -870,6 +870,7 @@
     let lastTrailFrameAt = 0;
     let lastRms = 0;
     let activeTrailSegment = null;
+    let trailNotes = [];
     let trailWidth = 0;
     let trailHeight = 0;
     let trailDpr = 1;
@@ -887,6 +888,8 @@
     const SUSTAIN_HOLD_MS = 2600;
     const TRAIL_SPEED_PX_PER_MS = 0.026;
     const TRAIL_NOTE_LENGTH = 10;
+    const TRAIL_MERGE_CENTS = 5;
+    const TRAIL_MERGE_MS = 900;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -1000,6 +1003,12 @@
       trailContext.fillStyle = 'rgba(0, 0, 0, 0.012)';
       trailContext.fillRect(0, 0, trailWidth, trailHeight);
       trailContext.restore();
+
+      const cssDelta = delta / trailDpr;
+      trailNotes.forEach((note) => {
+        note.y += cssDelta;
+      });
+      trailNotes = trailNotes.filter((note) => note.y < pitchTrail.clientHeight + 24);
     }
 
     function trailStartY() {
@@ -1040,32 +1049,66 @@
       return leftPad + frequencyRatio * usableWidth;
     }
 
-    function updateTrailSegment(frequency, color, rms, now) {
+    function redrawTrailNote(note) {
+      const clearPad = 12;
+      trailContext.clearRect(
+        note.x - TRAIL_NOTE_LENGTH / 2 - clearPad,
+        note.y - clearPad,
+        TRAIL_NOTE_LENGTH + clearPad * 2,
+        clearPad * 2
+      );
+      drawTrailLine(note.x, note.y, note.color, TRAIL_NOTE_LENGTH, note.alpha);
+    }
+
+    function quantizedTrailCents(cents) {
+      return clamp(
+        Math.round(cents / TRAIL_MERGE_CENTS) * TRAIL_MERGE_CENTS,
+        -METER_RANGE_CENTS,
+        METER_RANGE_CENTS
+      );
+    }
+
+    function updateTrailSegment(frequency, cents, color, rms, now) {
       const isNewPluck = now - lastValidPitchAt > 360;
       const isAttack = rms > 0.004 && rms > lastRms * 1.35;
+      const bucket = quantizedTrailCents(cents);
+      const target = getSelectedTarget(frequency);
+      const recentNote = trailNotes.find((note) => (
+        note.targetKey === target.key
+        && note.bucket === bucket
+        && now - note.updatedAt < TRAIL_MERGE_MS
+      ));
 
-      if (isNewPluck || isAttack || !activeTrailSegment) {
+      if (recentNote && !isNewPluck && !isAttack) {
+        recentNote.x = recentNote.x * 0.82 + trailXForFrequency(frequency) * 0.18;
+        recentNote.color = color;
+        recentNote.alpha = Math.min(0.9, recentNote.alpha + 0.02);
+        recentNote.updatedAt = now;
+        activeTrailSegment = recentNote;
+        redrawTrailNote(recentNote);
+      } else if (isNewPluck || isAttack || !activeTrailSegment) {
         activeTrailSegment = {
+          targetKey: target.key,
+          bucket,
           x: trailXForFrequency(frequency),
           y: trailStartY(),
           color,
           startedAt: now,
           lastDrawAt: now,
-          length: TRAIL_NOTE_LENGTH
+          updatedAt: now,
+          length: TRAIL_NOTE_LENGTH,
+          alpha: 0.72
         };
+        trailNotes.push(activeTrailSegment);
+        drawTrailLine(activeTrailSegment.x, activeTrailSegment.y, color, TRAIL_NOTE_LENGTH, activeTrailSegment.alpha);
       } else {
         activeTrailSegment.x = activeTrailSegment.x * 0.78 + trailXForFrequency(frequency) * 0.22;
         activeTrailSegment.color = color;
+        activeTrailSegment.updatedAt = now;
+        redrawTrailNote(activeTrailSegment);
       }
 
       activeTrailSegment.length = TRAIL_NOTE_LENGTH;
-      drawTrailLine(
-        activeTrailSegment.x,
-        activeTrailSegment.y,
-        activeTrailSegment.color,
-        activeTrailSegment.length,
-        0.72
-      );
       activeTrailSegment.lastDrawAt = now;
       lastValidPitchAt = now;
     }
@@ -1229,7 +1272,7 @@
           updateReadout(smoothedPitch);
           const target = getSelectedTarget(smoothedPitch);
           const cents = centsOff(smoothedPitch, target.freq);
-          updateTrailSegment(smoothedPitch, trailColorForCents(cents), rms, now);
+          updateTrailSegment(smoothedPitch, cents, trailColorForCents(cents), rms, now);
         } else {
           direction.textContent = 'Play an open ukulele string';
           clearPointerState();
@@ -1305,6 +1348,7 @@
       lastGoodPitchAt = 0;
       lastValidPitchAt = 0;
       activeTrailSegment = null;
+      trailNotes = [];
       direction.textContent = 'Play an open string';
       clearPointerState();
       updateLevel(0);
