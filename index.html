@@ -204,24 +204,46 @@
       position: absolute;
       left: 50%;
       top: -62px;
-      width: 190px;
+      width: 150px;
       padding: 0 8px;
       transform: translateX(-50%);
       transition: left 70ms ease-out, color 110ms ease;
       text-align: center;
       color: color-mix(in srgb, var(--needle-color) 72%, var(--white));
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 800;
       line-height: 1.35;
       z-index: 8;
       pointer-events: none;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.88);
     }
 
-    .readout strong {
+    .bottom-panel {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      width: min(calc(100% - 28px), 360px);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .bottom-status {
+      width: 100%;
+      padding: 0 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.88);
+    }
+
+    .bottom-status strong {
       display: block;
-      color: currentColor;
-      font-size: 18px;
+      color: var(--white);
+      font-size: 24px;
       line-height: 1.05;
+      margin-bottom: 2px;
     }
 
     .tuner-scale {
@@ -582,12 +604,21 @@
 
       .readout {
         top: 96px;
-        width: 220px;
+        width: 170px;
+        font-size: 14px;
+      }
+
+      .bottom-panel {
+        bottom: max(20px, env(safe-area-inset-bottom));
+        width: min(calc(100% - 40px), 420px);
+      }
+
+      .bottom-status {
         font-size: 13px;
       }
 
-      .readout strong {
-        font-size: 24px;
+      .bottom-status strong {
+        font-size: 28px;
       }
 
       .tuner-scale {
@@ -691,10 +722,7 @@
         <div class="center-line" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
           <div class="readout">
-            <strong id="noteName">—</strong>
-            <span id="targetText">Waiting for microphone</span><br />
-            <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
-            <span id="direction">Play an open string</span>
+            <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span>
           </div>
           <div class="scale-ticks" id="scaleTicks"></div>
           <div class="scale-labels">
@@ -745,6 +773,14 @@
         </div>
       </section>
 
+      <section class="bottom-panel" aria-live="polite">
+        <div class="bottom-status">
+          <strong id="noteName">—</strong>
+          <span id="targetText">Waiting for microphone</span><br />
+          <span id="direction">Play an open string</span>
+        </div>
+      </section>
+
       <div class="volume-signal" aria-label="Input level" title="Input level">
         <span></span>
         <span></span>
@@ -777,6 +813,7 @@
     const centsText = document.querySelector('#centsText');
     const direction = document.querySelector('#direction');
     const needle = document.querySelector('#needle');
+    const readout = document.querySelector('.readout');
     const levelBars = [...document.querySelectorAll('.volume-signal span')];
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
