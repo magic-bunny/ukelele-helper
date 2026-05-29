@@ -209,23 +209,25 @@
     .sharp { right: 32px; }
 
     .readout {
-      position: absolute;
-      left: 50%;
-      top: 142px;
-      width: 230px;
-      transform: translateX(-50%);
+      width: 100%;
+      padding: 10px 14px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.58);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(14px);
       text-align: center;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-      z-index: 6;
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .readout strong {
       display: block;
       color: var(--white);
-      font-size: 20px;
-      line-height: 1.2;
+      font-size: 24px;
+      line-height: 1.05;
+      margin-bottom: 2px;
     }
 
     .tuner-scale {
@@ -241,9 +243,17 @@
     .scale-ticks {
       position: relative;
       height: 46px;
-      background: rgba(86, 86, 86, 0.22);
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(86, 86, 86, 0.14) 24%, rgba(86, 86, 86, 0.24) 36%, rgba(86, 86, 86, 0.24) 64%, rgba(86, 86, 86, 0.14) 76%, rgba(0, 0, 0, 0));
       border-radius: 2px 2px 0 0;
       overflow: hidden;
+    }
+
+    .scale-ticks::before {
+      content: "";
+      position: absolute;
+      inset: 0 25%;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .scale-ticks span {
@@ -262,6 +272,10 @@
       background: rgba(255, 255, 255, 0.72);
     }
 
+    .scale-ticks .fade { opacity: 0.45; }
+
+    .scale-ticks .edge { opacity: 0.16; }
+
     .scale-ticks .zero {
       bottom: 0;
       height: 44px;
@@ -271,19 +285,18 @@
     }
 
     .scale-labels {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
+      position: relative;
       height: 26px;
-      padding: 0 12px;
-      background: rgba(104, 104, 104, 0.18);
+      background: linear-gradient(90deg, transparent, rgba(104, 104, 104, 0.18) 25%, rgba(104, 104, 104, 0.18) 75%, transparent);
       color: rgba(255, 255, 255, 0.64);
       font-size: 13px;
       line-height: 1;
     }
 
-    .scale-labels span:last-child {
-      text-align: right;
+    .scale-labels span {
+      position: absolute;
+      top: 8px;
+      transform: translateX(-50%);
     }
 
     .headstock-scene {
@@ -398,7 +411,7 @@
       position: absolute;
       z-index: 7;
       top: 110px;
-      bottom: -84px;
+      bottom: -86px;
       width: 2px;
       border-radius: 999px;
       background: linear-gradient(rgba(255, 255, 255, 0.78), rgba(196, 198, 185, 0.7));
@@ -454,7 +467,15 @@
     .peg-4 { right: 18px; top: 206px; }
 
     .bottom-panel {
-      display: none;
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      display: grid;
+      gap: 6px;
+      width: min(calc(100% - 28px), 360px);
+      transform: translateX(-50%);
+      pointer-events: none;
     }
 
     .message {
@@ -590,13 +611,12 @@
       .sharp { right: 44px; }
 
       .readout {
-        top: 220px;
-        width: 320px;
-        font-size: 15px;
+        width: 100%;
+        font-size: 13px;
       }
 
       .readout strong {
-        font-size: 40px;
+        font-size: 28px;
       }
 
       .tuner-scale {
@@ -626,6 +646,11 @@
       .scale-labels {
         height: 30px;
         font-size: 15px;
+      }
+
+      .bottom-panel {
+        bottom: max(20px, env(safe-area-inset-bottom));
+        width: min(calc(100% - 40px), 420px);
       }
 
       .headstock-scene {
@@ -694,42 +719,32 @@
         <div class="pitch-marker" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
           <div class="scale-ticks">
-            <span class="major" style="left: 0%"></span>
-            <span style="left: 5%"></span>
-            <span style="left: 10%"></span>
-            <span style="left: 15%"></span>
-            <span style="left: 20%"></span>
+            <span class="edge" style="left: 0%"></span>
+            <span class="fade" style="left: 6.25%"></span>
+            <span class="fade" style="left: 12.5%"></span>
+            <span class="fade" style="left: 18.75%"></span>
             <span class="major" style="left: 25%"></span>
-            <span style="left: 30%"></span>
-            <span style="left: 35%"></span>
-            <span style="left: 40%"></span>
-            <span style="left: 45%"></span>
+            <span style="left: 31.25%"></span>
+            <span style="left: 37.5%"></span>
+            <span style="left: 43.75%"></span>
             <span class="zero" style="left: 50%"></span>
-            <span style="left: 55%"></span>
-            <span style="left: 60%"></span>
-            <span style="left: 65%"></span>
-            <span style="left: 70%"></span>
+            <span style="left: 56.25%"></span>
+            <span style="left: 62.5%"></span>
+            <span style="left: 68.75%"></span>
             <span class="major" style="left: 75%"></span>
-            <span style="left: 80%"></span>
-            <span style="left: 85%"></span>
-            <span style="left: 90%"></span>
-            <span style="left: 95%"></span>
-            <span class="major" style="left: 100%"></span>
+            <span class="fade" style="left: 81.25%"></span>
+            <span class="fade" style="left: 87.5%"></span>
+            <span class="fade" style="left: 93.75%"></span>
+            <span class="edge" style="left: 100%"></span>
           </div>
           <div class="scale-labels">
-            <span>-50 b</span>
-            <span>0</span>
-            <span># 50</span>
+            <span style="left: 25%">-50</span>
+            <span style="left: 50%">0</span>
+            <span style="left: 75%">+50</span>
           </div>
         </div>
         <span class="flat">♭</span>
         <span class="sharp">♯</span>
-        <div class="readout">
-          <strong id="noteName">—</strong>
-          <span id="targetText">Waiting for microphone</span><br />
-          <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
-          <span id="direction">Play an open string</span>
-        </div>
       </section>
 
       <section class="headstock-scene" aria-label="Four ukulele strings">
@@ -770,7 +785,13 @@
         </div>
       </section>
 
-      <section class="bottom-panel">
+      <section class="bottom-panel" aria-live="polite">
+        <div class="readout">
+          <strong id="noteName">—</strong>
+          <span id="targetText">Waiting for microphone</span><br />
+          <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
+          <span id="direction">Play an open string</span>
+        </div>
         <div class="message" id="toast">Requesting microphone access...</div>
       </section>
 
@@ -826,7 +847,9 @@
     const YIN_THRESHOLD = 0.24;
     const MAX_YIN_VALUE = 0.58;
     const PITCH_WINDOW = 3;
-    const METER_RANGE_CENTS = 50;
+    const METER_RANGE_CENTS = 100;
+    const METER_FADE_CENTS = 50;
+    const METER_TRAVEL_PERCENT = 48;
 
     function centsOff(frequency, target) {
       return 1200 * Math.log2(frequency / target);
@@ -869,14 +892,14 @@
       const limited = clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS);
       const isInTune = Math.abs(cents) <= 5;
       const isNear = Math.abs(cents) <= 15;
-      const isFar = Math.abs(cents) > METER_RANGE_CENTS;
+      const isFar = Math.abs(cents) > METER_FADE_CENTS;
 
       setActiveString(target.key);
       noteName.textContent = target.key;
       targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
       freqText.textContent = `${frequency.toFixed(2)} Hz`;
       centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-      needle.style.left = `${50 + limited * (42 / METER_RANGE_CENTS)}%`;
+      needle.style.left = `${50 + limited * (METER_TRAVEL_PERCENT / METER_RANGE_CENTS)}%`;
       needle.classList.toggle('tuned', isInTune);
 
       if (isInTune) {
