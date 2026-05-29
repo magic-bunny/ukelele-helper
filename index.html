@@ -210,12 +210,7 @@
 
     .readout {
       width: 100%;
-      padding: 10px 14px 9px;
-      border: 1px solid rgba(255, 255, 255, 0.13);
-      border-radius: 18px;
-      background: rgba(0, 0, 0, 0.58);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
+      padding: 0 14px;
       text-align: center;
       color: var(--muted);
       font-size: 12px;
@@ -244,16 +239,18 @@
       position: relative;
       height: 46px;
       background:
-        linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(86, 86, 86, 0.14) 24%, rgba(86, 86, 86, 0.24) 36%, rgba(86, 86, 86, 0.24) 64%, rgba(86, 86, 86, 0.14) 76%, rgba(0, 0, 0, 0));
+        linear-gradient(90deg, transparent, rgba(86, 86, 86, 0.04) 8%, rgba(86, 86, 86, 0.12) 18%, rgba(86, 86, 86, 0.22) 31%, rgba(86, 86, 86, 0.24) 50%, rgba(86, 86, 86, 0.22) 69%, rgba(86, 86, 86, 0.12) 82%, rgba(86, 86, 86, 0.04) 92%, transparent);
       border-radius: 2px 2px 0 0;
       overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
     }
 
     .scale-ticks::before {
       content: "";
       position: absolute;
-      inset: 0 25%;
-      background: rgba(255, 255, 255, 0.05);
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.055), transparent 68%);
     }
 
     .scale-ticks span {
@@ -272,10 +269,6 @@
       background: rgba(255, 255, 255, 0.72);
     }
 
-    .scale-ticks .fade { opacity: 0.45; }
-
-    .scale-ticks .edge { opacity: 0.16; }
-
     .scale-ticks .zero {
       bottom: 0;
       height: 44px;
@@ -287,7 +280,6 @@
     .scale-labels {
       position: relative;
       height: 26px;
-      background: linear-gradient(90deg, transparent, rgba(104, 104, 104, 0.18) 25%, rgba(104, 104, 104, 0.18) 75%, transparent);
       color: rgba(255, 255, 255, 0.64);
       font-size: 13px;
       line-height: 1;
@@ -471,22 +463,9 @@
       z-index: 12;
       left: 50%;
       bottom: max(12px, env(safe-area-inset-bottom));
-      display: grid;
-      gap: 6px;
       width: min(calc(100% - 28px), 360px);
       transform: translateX(-50%);
       pointer-events: none;
-    }
-
-    .message {
-      min-height: 18px;
-      color: rgba(255, 255, 255, 0.72);
-      font-size: 12px;
-      line-height: 1.45;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .volume-signal {
@@ -682,10 +661,6 @@
       .note-g { left: 24px; top: auto; bottom: 252px; }
       .note-a { right: 24px; top: auto; bottom: 252px; }
 
-      .message {
-        font-size: 13px;
-      }
-
       .volume-signal {
         left: 20px;
         bottom: 20px;
@@ -719,10 +694,10 @@
         <div class="pitch-marker" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
           <div class="scale-ticks">
-            <span class="edge" style="left: 0%"></span>
-            <span class="fade" style="left: 6.25%"></span>
-            <span class="fade" style="left: 12.5%"></span>
-            <span class="fade" style="left: 18.75%"></span>
+            <span style="left: 0%; opacity: 0.05"></span>
+            <span style="left: 6.25%; opacity: 0.12"></span>
+            <span style="left: 12.5%; opacity: 0.22"></span>
+            <span style="left: 18.75%; opacity: 0.38"></span>
             <span class="major" style="left: 25%"></span>
             <span style="left: 31.25%"></span>
             <span style="left: 37.5%"></span>
@@ -732,10 +707,10 @@
             <span style="left: 62.5%"></span>
             <span style="left: 68.75%"></span>
             <span class="major" style="left: 75%"></span>
-            <span class="fade" style="left: 81.25%"></span>
-            <span class="fade" style="left: 87.5%"></span>
-            <span class="fade" style="left: 93.75%"></span>
-            <span class="edge" style="left: 100%"></span>
+            <span style="left: 81.25%; opacity: 0.38"></span>
+            <span style="left: 87.5%; opacity: 0.22"></span>
+            <span style="left: 93.75%; opacity: 0.12"></span>
+            <span style="left: 100%; opacity: 0.05"></span>
           </div>
           <div class="scale-labels">
             <span style="left: 25%">-50</span>
@@ -792,7 +767,6 @@
           <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
           <span id="direction">Play an open string</span>
         </div>
-        <div class="message" id="toast">Requesting microphone access...</div>
       </section>
 
       <div class="volume-signal" aria-label="Input level" title="Input level">
@@ -828,7 +802,6 @@
     const direction = document.querySelector('#direction');
     const needle = document.querySelector('#needle');
     const levelBars = [...document.querySelectorAll('.volume-signal span')];
-    const toast = document.querySelector('#toast');
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
 
@@ -880,7 +853,6 @@
       lowGButton.classList.toggle('active', isLowG);
       gFreq.textContent = `${stringSet[0].freq.toFixed(2)} Hz`;
       document.querySelector('[data-string="G"] .hint').textContent = stringSet[0].hint;
-      toast.textContent = isLowG ? 'Low G selected: target G3 / 196.00 Hz.' : 'High G selected: target G4 / 392.00 Hz.';
       if (manualString === 'G') {
         targetText.textContent = `Target ${stringSet[0].note} · ${stringSet[0].freq.toFixed(2)} Hz`;
       }
@@ -1010,7 +982,7 @@
       if (mediaStream) return;
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        toast.textContent = 'This browser does not support microphone input.';
+        direction.textContent = 'This browser does not support microphone input';
         return;
       }
 
@@ -1032,13 +1004,12 @@
         analyser.smoothingTimeConstant = 0;
         buffer = new Float32Array(analyser.fftSize);
         sourceNode.connect(analyser);
-        toast.textContent = 'Listening. Play one open string at a time, or tap C/G/E/A to lock a target.';
         loop();
       } catch (error) {
         mediaStream = null;
-        toast.textContent = error.name === 'NotAllowedError'
-          ? 'Microphone permission was blocked. Click anywhere to retry.'
-          : 'Microphone unavailable. Use localhost or HTTPS, then click anywhere to retry.';
+        direction.textContent = error.name === 'NotAllowedError'
+          ? 'Microphone blocked, click anywhere to retry'
+          : 'Microphone unavailable, use localhost or HTTPS';
       }
     }
 
@@ -1052,7 +1023,6 @@
       direction.textContent = 'Play an open string';
       needle.classList.remove('tuned');
       updateLevel(0);
-      toast.textContent = 'Microphone paused while the page is hidden.';
     }
 
     highGButton.addEventListener('click', () => updateGMode(false));
@@ -1067,9 +1037,9 @@
           noteName.textContent = target.key;
           needle.classList.remove('tuned');
           targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
-          toast.textContent = `${target.key} locked. Tap it again to return to Auto.`;
+          direction.textContent = `${target.key} locked`;
         } else {
-          toast.textContent = 'Auto string matching restored.';
+          direction.textContent = 'Auto string matching';
         }
       });
     });
