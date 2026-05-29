@@ -183,7 +183,7 @@
       background: linear-gradient(transparent, color-mix(in srgb, var(--needle-color) 92%, transparent) 16%, color-mix(in srgb, var(--needle-color) 92%, transparent) 78%, transparent);
       box-shadow: 0 0 14px color-mix(in srgb, var(--needle-color) 54%, transparent);
       transition: left 70ms ease-out, background 110ms ease, box-shadow 110ms ease;
-      z-index: 6;
+      z-index: 4;
     }
 
     .flat,
@@ -398,7 +398,7 @@
 
     .headstock {
       position: absolute;
-      z-index: 5;
+      z-index: 9;
       left: 50%;
       top: auto;
       bottom: 86px;
@@ -428,11 +428,13 @@
       left: 0;
       right: 0;
       top: 50px;
-      color: rgba(255, 236, 190, 0.42);
+      color: rgba(255, 246, 214, 0.72);
       text-align: center;
-      font-size: 15px;
-      letter-spacing: 0.04em;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(75, 28, 8, 0.55), 0 0 8px rgba(255, 222, 148, 0.22);
     }
 
     .nut {
