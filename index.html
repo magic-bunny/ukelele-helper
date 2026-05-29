@@ -175,8 +175,8 @@
 
     .center-line {
       position: absolute;
-      top: -70px;
-      bottom: -210px;
+      top: -16px;
+      height: 390px;
       left: 50%;
       width: 2px;
       transform: translateX(-50%);
@@ -204,18 +204,39 @@
       position: absolute;
       left: 50%;
       top: -62px;
-      width: 150px;
-      padding: 0 8px;
+      width: 28px;
+      height: 28px;
       transform: translateX(-50%);
-      transition: left 70ms ease-out, color 110ms ease;
-      text-align: center;
-      color: color-mix(in srgb, var(--needle-color) 72%, var(--white));
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1.35;
+      transition: left 70ms ease-out, opacity 110ms ease;
       z-index: 8;
       pointer-events: none;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.88);
+      opacity: 0;
+    }
+
+    .readout::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--needle-color) 82%, rgba(0, 0, 0, 0.45));
+      box-shadow: 0 0 14px color-mix(in srgb, var(--needle-color) 62%, transparent);
+      transform: translateX(-22px);
+    }
+
+    .readout::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 7px;
+      width: 14px;
+      height: 8px;
+      border-left: 3px solid #061004;
+      border-bottom: 3px solid #061004;
+      transform: translateX(-22px) rotate(-45deg);
+    }
+
+    .readout.in-tune {
+      opacity: 1;
     }
 
     .bottom-panel {
@@ -589,8 +610,8 @@
       }
 
       .center-line {
-        top: -92px;
-        bottom: -148px;
+        top: 32px;
+        height: 440px;
       }
 
       .flat,
@@ -603,9 +624,7 @@
       .sharp { right: 44px; }
 
       .readout {
-        top: 96px;
-        width: 170px;
-        font-size: 14px;
+        top: 112px;
       }
 
       .bottom-panel {
@@ -721,9 +740,7 @@
       <section class="meter-zone" aria-live="polite">
         <div class="center-line" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
-          <div class="readout">
-            <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span>
-          </div>
+          <div class="readout" id="tuneIcon"></div>
           <div class="scale-ticks" id="scaleTicks"></div>
           <div class="scale-labels">
             <span style="left: 25%">-50</span>
@@ -777,6 +794,7 @@
         <div class="bottom-status">
           <strong id="noteName">—</strong>
           <span id="targetText">Waiting for microphone</span><br />
+          <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
           <span id="direction">Play an open string</span>
         </div>
       </section>
@@ -814,6 +832,7 @@
     const direction = document.querySelector('#direction');
     const needle = document.querySelector('#needle');
     const readout = document.querySelector('.readout');
+    const tuneIcon = document.querySelector('#tuneIcon');
     const levelBars = [...document.querySelectorAll('.volume-signal span')];
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
@@ -912,6 +931,7 @@
 
     function clearPointerState() {
       setPointer(50, 'var(--green)');
+      tuneIcon.classList.remove('in-tune');
       clearTickHighlight();
     }
 
@@ -962,6 +982,7 @@
       freqText.textContent = `${frequency.toFixed(2)} Hz`;
       centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
       setPointer(pointerPosition, pointerColor);
+      tuneIcon.classList.toggle('in-tune', isInTune);
       highlightTick(limited);
       lastGoodPitchAt = performance.now();
 
