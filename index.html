@@ -886,6 +886,7 @@
     const PREAMP_GAIN = 2.2;
     const SUSTAIN_HOLD_MS = 2600;
     const TRAIL_SPEED_PX_PER_MS = 0.026;
+    const TRAIL_NOTE_LENGTH = 10;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -1020,7 +1021,7 @@
       trailContext.lineTo(x + length / 2, y);
       trailContext.stroke();
       trailContext.globalAlpha = alpha * 0.3;
-      trailContext.lineWidth = 6;
+      trailContext.lineWidth = 4;
       trailContext.beginPath();
       trailContext.moveTo(x - length / 2, y);
       trailContext.lineTo(x + length / 2, y);
@@ -1050,14 +1051,14 @@
           color,
           startedAt: now,
           lastDrawAt: now,
-          length: 12
+          length: TRAIL_NOTE_LENGTH
         };
       } else {
         activeTrailSegment.x = activeTrailSegment.x * 0.78 + trailXForFrequency(frequency) * 0.22;
         activeTrailSegment.color = color;
       }
 
-      activeTrailSegment.length = clamp((now - activeTrailSegment.startedAt) * 0.12 + rms * 720, 18, 150);
+      activeTrailSegment.length = TRAIL_NOTE_LENGTH;
       drawTrailLine(
         activeTrailSegment.x,
         activeTrailSegment.y,
