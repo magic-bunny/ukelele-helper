@@ -889,7 +889,6 @@
     const TRAIL_SPEED_PX_PER_MS = 0.026;
     const TRAIL_NOTE_LENGTH = 10;
     const TRAIL_MERGE_CENTS = 5;
-    const TRAIL_MERGE_MS = 1400;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -990,25 +989,15 @@
       if (!trailWidth || !trailHeight) resizePitchTrail();
       if (!lastTrailFrameAt) lastTrailFrameAt = now;
 
-      const delta = clamp((now - lastTrailFrameAt) * TRAIL_SPEED_PX_PER_MS * trailDpr, 0, 2.6 * trailDpr);
+      const delta = clamp((now - lastTrailFrameAt) * TRAIL_SPEED_PX_PER_MS, 0, 2.6);
       lastTrailFrameAt = now;
       if (delta <= 0) return;
 
-      trailContext.save();
-      trailContext.setTransform(1, 0, 0, 1, 0, 0);
-      trailContext.globalCompositeOperation = 'source-over';
-      trailContext.drawImage(pitchTrail, 0, delta);
-      trailContext.clearRect(0, 0, trailWidth, delta + 5 * trailDpr);
-      trailContext.globalCompositeOperation = 'destination-out';
-      trailContext.fillStyle = 'rgba(0, 0, 0, 0.012)';
-      trailContext.fillRect(0, 0, trailWidth, trailHeight);
-      trailContext.restore();
-
-      const cssDelta = delta / trailDpr;
       trailNotes.forEach((note) => {
-        note.y += cssDelta;
+        note.y += delta;
       });
       trailNotes = trailNotes.filter((note) => note.y < pitchTrail.clientHeight + 24);
+      renderPitchTrail();
     }
 
     function trailStartY() {
@@ -1026,16 +1015,25 @@
       trailContext.globalAlpha = alpha;
       trailContext.lineWidth = 2;
       trailContext.beginPath();
-      trailContext.moveTo(x - length / 2, y);
-      trailContext.lineTo(x + length / 2, y);
+      trailContext.moveTo(x, y - length / 2);
+      trailContext.lineTo(x, y + length / 2);
       trailContext.stroke();
       trailContext.globalAlpha = alpha * 0.3;
       trailContext.lineWidth = 4;
       trailContext.beginPath();
-      trailContext.moveTo(x - length / 2, y);
-      trailContext.lineTo(x + length / 2, y);
+      trailContext.moveTo(x, y - length / 2);
+      trailContext.lineTo(x, y + length / 2);
       trailContext.stroke();
       trailContext.restore();
+    }
+
+    function renderPitchTrail() {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+      const rect = pitchTrail.getBoundingClientRect();
+      trailContext.clearRect(0, 0, rect.width, rect.height);
+      trailNotes.forEach((note) => {
+        drawTrailLine(note.x, note.y, note.color, TRAIL_NOTE_LENGTH, note.alpha);
+      });
     }
 
     function trailXForCents(cents) {
@@ -1055,17 +1053,17 @@
     function updateTrailSegment(frequency, cents, color, rms, now) {
       const bucket = quantizedTrailCents(cents);
       const target = getSelectedTarget(frequency);
-      const recentNote = trailNotes.find((note) => (
+      const existingNote = trailNotes.find((note) => (
         note.targetKey === target.key
         && note.bucket === bucket
-        && now - note.updatedAt < TRAIL_MERGE_MS
       ));
 
-      if (recentNote) {
-        // Merge repeated detections into the same tick note instead of drawing a dense stack.
-        recentNote.color = color;
-        recentNote.updatedAt = now;
-        activeTrailSegment = recentNote;
+      if (existingNote) {
+        // One visible note per 5-cent tick: update the note object, then repaint the canvas once.
+        existingNote.color = color;
+        existingNote.alpha = Math.min(0.9, existingNote.alpha + 0.02);
+        existingNote.updatedAt = now;
+        activeTrailSegment = existingNote;
       } else {
         activeTrailSegment = {
           targetKey: target.key,
@@ -1080,11 +1078,11 @@
           alpha: 0.72
         };
         trailNotes.push(activeTrailSegment);
-        drawTrailLine(activeTrailSegment.x, activeTrailSegment.y, color, TRAIL_NOTE_LENGTH, activeTrailSegment.alpha);
       }
 
       activeTrailSegment.lastDrawAt = now;
       lastValidPitchAt = now;
+      renderPitchTrail();
     }
 
     function getSelectedTarget(frequency) {
