@@ -484,6 +484,13 @@
       background: linear-gradient(rgba(255, 255, 255, 0.78), rgba(196, 198, 185, 0.7));
       box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
       transform-origin: bottom;
+      transition: background 120ms ease, box-shadow 120ms ease, width 120ms ease;
+    }
+
+    .string.active {
+      width: 3px;
+      background: linear-gradient(rgba(128, 221, 0, 0.98), rgba(221, 255, 174, 0.9));
+      box-shadow: 0 0 12px rgba(128, 221, 0, 0.92), 0 0 22px rgba(128, 221, 0, 0.36);
     }
 
     .s1 { left: 37px; transform: rotate(-5deg); }
@@ -798,10 +805,10 @@
           <div class="peg peg-right peg-4"></div>
           <div class="nut"></div>
           <div class="fretboard"></div>
-          <div class="string s1"></div>
-          <div class="string s2"></div>
-          <div class="string s3"></div>
-          <div class="string s4"></div>
+          <div class="string s1" data-string="G"></div>
+          <div class="string s2" data-string="C"></div>
+          <div class="string s3" data-string="E"></div>
+          <div class="string s4" data-string="A"></div>
         </div>
       </section>
 
@@ -851,6 +858,7 @@
     const levelBars = [...document.querySelectorAll('.volume-signal span')];
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
+    const headstockStrings = [...document.querySelectorAll('.headstock .string')];
     const scaleTicks = document.querySelector('#scaleTicks');
     const pitchTrail = document.querySelector('#pitchTrail');
     const trailContext = pitchTrail.getContext('2d');
@@ -893,6 +901,8 @@
     const TRAIL_SPEED_PX_PER_MS = 0.024;
     const TRAIL_NOTE_LENGTH = 20;
     const TRAIL_MERGE_CENTS = 5;
+    // Temporarily disable the pitch-trail polyline/dot effect.
+    const ENABLE_PITCH_TRAIL = false;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -970,6 +980,7 @@
       setPointer(50, 'var(--green)');
       tuneIcon.classList.remove('in-tune');
       clearTickHighlight();
+      setActiveString(null);
     }
 
     function playTuneChime(target, now) {
@@ -1166,6 +1177,7 @@
 
     function setActiveString(key) {
       stringCards.forEach((card) => card.classList.toggle('active', card.dataset.string === key));
+      headstockStrings.forEach((string) => string.classList.toggle('active', string.dataset.string === key));
     }
 
     function updateGMode(isLowG) {
@@ -1314,7 +1326,9 @@
           updateReadout(smoothedPitch);
           const target = getSelectedTarget(smoothedPitch);
           const cents = centsOff(smoothedPitch, target.freq);
-          updateTrailSegment(smoothedPitch, cents, trailColorForCents(cents), rms, now);
+          if (ENABLE_PITCH_TRAIL) {
+            updateTrailSegment(smoothedPitch, cents, trailColorForCents(cents), rms, now);
+          }
         } else {
           direction.textContent = 'Play an open ukulele string';
           clearPointerState();
@@ -1406,9 +1420,9 @@
         if (manualString) {
           const target = stringSet.find((item) => item.key === manualString);
           tuneChimeArmed = true;
-          setActiveString(target.key);
           noteName.textContent = target.key;
           clearPointerState();
+          setActiveString(target.key);
           targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
           direction.textContent = `${target.key} locked`;
         } else {
