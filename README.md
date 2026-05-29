@@ -1,66 +1,57 @@
-# Instrument Tuner
+# Ukulele Helper
 
-A lightweight React single-page tuner for ukulele and other string instruments. The app uses one routed page for the home screen and 14 instrument tuner views with real-time microphone pitch detection, a cents meter, pitch trail notes, and an in-tune chime.
+A lightweight, single-page ukulele tuner that runs directly in the browser. It listens through the microphone, detects the pitch of an open string, and shows whether the string is flat, sharp, or in tune.
 
 ## Live Site
 
 Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny.github.io/ukelele-helper/)
 
-![Instrument Tuner screenshot](docs/screenshot.png)
-
-## Supported Instruments
-
-- Guitar
-- Guitar 7-string
-- Guitar 12-string
-- Bass Guitar
-- Bass Guitar 5-string
-- Ukulele
-- Violin/Fiddle
-- Viola
-- Cello
-- Cavaquinho
-- Mandolin
-- Balalaika
-- Banjo 4-string
-- Banjo 5-string
+![Ukulele Helper screenshot](docs/screenshot.png)
 
 ## Features
 
-- React single-page app with hash routes for GitHub Pages
-- Separate tuner view per instrument without separate duplicated HTML pages
 - Real-time microphone pitch detection using the Web Audio API
-- Automatic string matching for each instrument tuning
-- Manual target lock by tapping a string button
+- Automatic string matching for standard ukulele tuning
+- High G and Low G mode switching
+- Manual target lock for C, G, E, and A strings
 - Visual cents meter with flat/sharp guidance
-- Downward scrolling pitch trail notes
-- In-tune check icon and short chime
 - Input level indicator
 - Mobile-first responsive interface
+- No build step and no external dependencies
+
+## Tuning Targets
+
+| String | High G Mode | Low G Mode |
+| --- | --- | --- |
+| G | G4 / 392.00 Hz | G3 / 196.00 Hz |
+| C | C4 / 261.63 Hz | C4 / 261.63 Hz |
+| E | E4 / 329.63 Hz | E4 / 329.63 Hz |
+| A | A4 / 440.00 Hz | A4 / 440.00 Hz |
 
 ## Usage
 
-1. Open the [live site](https://magic-bunny.github.io/ukelele-helper/).
-2. Choose an instrument from the home page.
-3. Allow microphone access when prompted.
-4. Play one open string at a time.
-5. Follow the meter and text guidance:
+1. Open the [live site](https://magic-bunny.github.io/ukelele-helper/) or `index.html` in a browser.
+2. Allow microphone access when prompted.
+3. Play one open string at a time.
+4. Follow the meter and text guidance:
    - `Flat`: tighten the string.
    - `Sharp`: loosen the string.
    - `In tune`: the string is within the target range.
-6. Tap a string button to lock the tuner to that target. Tap it again to return to automatic matching.
+5. Tap a string button to lock the tuner to that target. Tap it again to return to automatic matching.
+6. Use the High G / Low G switch for the G string setup on your instrument.
 
 ## Local Development
 
+Because microphone access usually requires a secure context, run the page from `localhost` instead of opening the file directly if your browser blocks the microphone.
+
 ```bash
-npm install
-npm run dev
+python3 -m http.server 8000
 ```
 
-Build for GitHub Pages:
+Then open:
 
-```bash
-npm run build
+```text
+http://localhost:8000
 ```
 
 ## Browser Notes
@@ -76,13 +67,7 @@ npm run build
 .
 ├── docs/
 │   └── screenshot.png  # Site screenshot for README
-├── public/             # Compatibility redirects for old instrument URLs
-├── src/
-│   ├── instruments.js  # Instrument tunings and display metadata
-│   ├── main.jsx        # React app, tuner logic, and hash routes
-│   └── styles.css      # App styling and instrument drawings
-├── index.html          # Vite entry point
-├── ukulele.html        # Preserved legacy stable ukulele page
+├── index.html          # App markup, styles, and JavaScript
 └── README.md           # Project documentation
 ```
 

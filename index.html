@@ -1,12 +1,1421 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instrument Tuner</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ukulele Tuner</title>
+  <style>
+    :root {
+      --bg: #030504;
+      --panel: rgba(9, 14, 12, 0.88);
+      --grid: rgba(91, 122, 105, 0.18);
+      --grid-strong: rgba(116, 156, 134, 0.22);
+      --line: #f05a2b;
+      --green: #80dd00;
+      --yellow: #ffd24a;
+      --red: #ff4d3f;
+      --needle-color: var(--green);
+      --green-soft: rgba(128, 221, 0, 0.25);
+      --white: #f6f8ef;
+      --muted: rgba(246, 248, 239, 0.66);
+      --dim: rgba(246, 248, 239, 0.42);
+      --wood-1: #eaa15a;
+      --wood-2: #b9632d;
+      --wood-3: #f7be73;
+      --metal: #cbd2cc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--white);
+      font-family: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(87, 112, 95, 0.22), transparent 18rem),
+        radial-gradient(circle at 50% 80%, rgba(137, 67, 24, 0.18), transparent 18rem),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .phone {
+      position: relative;
+      width: 100vw;
+      min-height: 100dvh;
+      overflow: hidden;
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        linear-gradient(var(--grid-strong) 2px, transparent 2px),
+        linear-gradient(90deg, var(--grid-strong) 2px, transparent 2px),
+        radial-gradient(circle at 50% 28%, rgba(28, 49, 38, 0.76), rgba(0, 0, 0, 0.94) 62%),
+        #020403;
+      background-size: 18px 18px, 18px 18px, 90px 90px, 90px 90px, auto, auto;
+      box-shadow: none;
+    }
+
+    .phone::before,
+    .phone::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .phone::before {
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.78), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.78));
+      z-index: 1;
+    }
+
+    .phone::after {
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.78) 100%);
+      z-index: 2;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 3;
+      width: min(100vw, 430px);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    .pitch-trail {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.7;
+      mix-blend-mode: screen;
+    }
+
+    .tuning-switch {
+      position: absolute;
+      z-index: 8;
+      top: 12px;
+      left: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.42);
+      opacity: 0.9;
+    }
+
+    .tuning-switch button {
+      min-width: 54px;
+      min-height: 28px;
+      border-radius: 999px;
+      color: var(--dim);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tuning-switch button.active {
+      color: #071006;
+      background: var(--green);
+    }
+
+    .site-links {
+      position: absolute;
+      z-index: 24;
+      top: 12px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .github-link {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.42);
+      color: rgba(255, 255, 255, 0.9);
+      opacity: 0.9;
+      transition: color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    }
+
+    .github-link:hover,
+    .github-link:focus-visible {
+      color: var(--green);
+      border-color: rgba(128, 221, 0, 0.58);
+      box-shadow: 0 0 18px rgba(128, 221, 0, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .github-link svg {
+      width: 21px;
+      height: 21px;
+      fill: currentColor;
+    }
+
+    .views-badge {
+      display: block;
+      height: 20px;
+      max-width: 96px;
+      opacity: 0.86;
+      filter: saturate(0.86);
+    }
+
+    .meter-zone {
+      position: absolute;
+      inset: 38px 0 auto;
+      height: 246px;
+      margin: 0;
+    }
+
+    .center-line {
+      position: absolute;
+      top: -16px;
+      height: 330px;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(transparent, color-mix(in srgb, var(--needle-color) 92%, transparent) 16%, color-mix(in srgb, var(--needle-color) 92%, transparent) 78%, transparent);
+      box-shadow: 0 0 14px color-mix(in srgb, var(--needle-color) 54%, transparent);
+      transition: left 70ms ease-out, background 110ms ease, box-shadow 110ms ease;
+      z-index: 4;
+    }
+
+    .flat,
+    .sharp {
+      position: absolute;
+      top: 162px;
+      color: rgba(255, 255, 255, 0.62);
+      font-family: Georgia, serif;
+      font-size: 26px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
+      z-index: 5;
+    }
+
+    .flat { left: 31px; }
+    .sharp { right: 32px; }
+
+    .readout {
+      position: absolute;
+      left: 50%;
+      top: -62px;
+      width: 28px;
+      height: 28px;
+      transform: translateX(-50%);
+      transition: left 70ms ease-out, opacity 110ms ease;
+      z-index: 8;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .readout::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--needle-color) 82%, rgba(0, 0, 0, 0.45));
+      box-shadow: 0 0 14px color-mix(in srgb, var(--needle-color) 62%, transparent);
+      transform: translateX(-22px);
+    }
+
+    .readout::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 7px;
+      width: 14px;
+      height: 8px;
+      border-left: 3px solid #061004;
+      border-bottom: 3px solid #061004;
+      transform: translateX(-22px) rotate(-45deg);
+    }
+
+    .readout.in-tune {
+      opacity: 1;
+    }
+
+    .bottom-panel {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      width: min(calc(100% - 28px), 360px);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .bottom-status {
+      width: 100%;
+      padding: 0 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.88);
+    }
+
+    .bottom-status strong {
+      display: block;
+      color: var(--white);
+      font-size: 24px;
+      line-height: 1.05;
+      margin-bottom: 2px;
+    }
+
+    .tuner-scale {
+      position: absolute;
+      z-index: 4;
+      top: 72px;
+      left: 12px;
+      right: 12px;
+      height: 72px;
+      color: rgba(255, 255, 255, 0.56);
+    }
+
+    .scale-ticks {
+      position: relative;
+      height: 46px;
+      background:
+        linear-gradient(90deg, transparent, rgba(86, 86, 86, 0.04) 8%, rgba(86, 86, 86, 0.12) 18%, rgba(86, 86, 86, 0.22) 31%, rgba(86, 86, 86, 0.24) 50%, rgba(86, 86, 86, 0.22) 69%, rgba(86, 86, 86, 0.12) 82%, rgba(86, 86, 86, 0.04) 92%, transparent);
+      border-radius: 2px 2px 0 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+    }
+
+    .scale-ticks::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.055), transparent 68%);
+    }
+
+    .scale-ticks span {
+      position: absolute;
+      bottom: 10px;
+      width: 2px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.62);
+      transform: translateX(-50%);
+      transition: height 90ms ease, opacity 90ms ease, background 90ms ease, box-shadow 90ms ease;
+    }
+
+    .scale-ticks .minor {
+      width: 1px;
+      height: 7px;
+    }
+
+    .scale-ticks .mid {
+      height: 16px;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    .scale-ticks .major {
+      height: 28px;
+      width: 3px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .scale-ticks .zero {
+      bottom: 0;
+      height: 44px;
+      width: 3px;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(128, 221, 0, 0.5);
+    }
+
+    .scale-ticks .active-tick {
+      bottom: 4px;
+      height: 38px;
+      width: 3px;
+      opacity: 1 !important;
+      background: var(--green);
+      box-shadow: 0 0 14px rgba(128, 221, 0, 0.72);
+    }
+
+    .scale-labels {
+      position: relative;
+      height: 26px;
+      color: rgba(255, 255, 255, 0.64);
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .scale-labels span {
+      position: absolute;
+      top: 8px;
+      transform: translateX(-50%);
+    }
+
+    .headstock-scene {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 410px;
+      margin: 0;
+    }
+
+    .note-button {
+      position: absolute;
+      z-index: 7;
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: 2px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.62);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 28px;
+      font-weight: 500;
+      box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.04), 0 8px 22px rgba(0, 0, 0, 0.42);
+      transition: border-color 140ms ease, box-shadow 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .note-button small,
+    .note-button .hint {
+      display: none;
+    }
+
+    .note-button.active {
+      color: #fff;
+      border-color: var(--green);
+      box-shadow: 0 0 0 5px rgba(128, 221, 0, 0.13), 0 0 26px rgba(128, 221, 0, 0.28);
+      transform: scale(1.05);
+    }
+
+    .note-c { left: 0; top: 68px; }
+    .note-e { right: 0; top: 68px; }
+    .note-g { left: 0; top: 182px; }
+    .note-a { right: 0; top: 182px; }
+
+    .headstock {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      top: auto;
+      bottom: 86px;
+      width: 158px;
+      height: 332px;
+      transform: translateX(-50%);
+      filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.58));
+    }
+
+    .wood {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 158px;
+      height: 332px;
+      clip-path: polygon(2% 4%, 35% 4%, 50% 0, 65% 4%, 98% 4%, 98% 73%, 88% 82%, 84% 100%, 16% 100%, 12% 82%, 2% 73%);
+      background:
+        radial-gradient(ellipse at 50% 16%, rgba(255, 231, 169, 0.42), transparent 19%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0 2px, transparent 2px 10px),
+        linear-gradient(90deg, var(--wood-2), var(--wood-3) 28%, var(--wood-1) 50%, #d47a32 72%, #8b441f);
+      border: 2px solid rgba(255, 218, 142, 0.9);
+      box-shadow: inset 16px 0 24px rgba(79, 28, 10, 0.28), inset -17px 0 22px rgba(64, 23, 8, 0.3);
+    }
+
+    .brand {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50px;
+      color: rgba(255, 246, 214, 0.72);
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(75, 28, 8, 0.55), 0 0 8px rgba(255, 222, 148, 0.22);
+    }
+
+    .nut {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 78px;
+      height: 12px;
+      border-radius: 3px;
+      background: linear-gradient(#fff9df, #d7c9a3);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .fretboard {
+      position: absolute;
+      left: 34px;
+      right: 34px;
+      bottom: -86px;
+      height: 168px;
+      border-radius: 0 0 12px 12px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 16%, transparent 84%, rgba(255, 255, 255, 0.1)),
+        linear-gradient(90deg, #2a1c12, #100b08 52%, #2b1a10);
+      background-size: 100% 42px, auto, auto;
+      box-shadow: inset 12px 0 16px rgba(255, 255, 255, 0.04), inset -12px 0 16px rgba(0, 0, 0, 0.26);
+    }
+
+    .string {
+      position: absolute;
+      z-index: 7;
+      top: 110px;
+      bottom: -86px;
+      width: 2px;
+      border-radius: 999px;
+      background: linear-gradient(rgba(255, 255, 255, 0.78), rgba(196, 198, 185, 0.7));
+      box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+      transform-origin: bottom;
+    }
+
+    .s1 { left: 37px; transform: rotate(-5deg); }
+    .s2 { left: 63px; transform: rotate(-2deg); }
+    .s3 { left: 95px; transform: rotate(2deg); }
+    .s4 { left: 121px; transform: rotate(5deg); }
+
+    .peg {
+      position: absolute;
+      z-index: 8;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff, var(--metal) 28%, #747d7a 58%, #e8ece4 76%);
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.34);
+    }
+
+    .peg::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      width: 46px;
+      height: 10px;
+      background: linear-gradient(#dae0d6, #757a74);
+      z-index: -1;
+    }
+
+    .peg::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      width: 36px;
+      height: 58px;
+      border-radius: 18px;
+      background: linear-gradient(90deg, #f7f2df, #fffdf1 45%, #d6d0bd);
+      z-index: -2;
+      box-shadow: inset -6px 0 14px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .peg-left::before { right: 18px; }
+    .peg-left::after { right: 42px; }
+    .peg-right::before { left: 18px; }
+    .peg-right::after { left: 42px; }
+    .peg-1 { left: 18px; top: 88px; }
+    .peg-2 { right: 18px; top: 88px; }
+    .peg-3 { left: 18px; top: 206px; }
+    .peg-4 { right: 18px; top: 206px; }
+
+
+    .volume-signal {
+      position: fixed;
+      z-index: 20;
+      left: 14px;
+      bottom: 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      width: 28px;
+      height: 22px;
+      padding: 3px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.34);
+    }
+
+    .volume-signal span {
+      width: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.24);
+      transition: height 80ms ease, background 80ms ease, box-shadow 80ms ease;
+    }
+
+    .volume-signal span:nth-child(1) { height: 5px; }
+    .volume-signal span:nth-child(2) { height: 9px; }
+    .volume-signal span:nth-child(3) { height: 13px; }
+    .volume-signal span:nth-child(4) { height: 17px; }
+
+    .volume-signal span.active {
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(128, 221, 0, 0.55);
+    }
+
+    @media (min-width: 520px) {
+      .phone {
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+
+    @media (min-width: 860px) {
+      body {
+        padding: 0;
+      }
+
+      .phone {
+        width: 100vw;
+        min-height: 100dvh;
+        border-radius: 0;
+        background:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+          linear-gradient(var(--grid-strong) 2px, transparent 2px),
+          linear-gradient(90deg, var(--grid-strong) 2px, transparent 2px),
+          radial-gradient(circle at 72% 42%, rgba(86, 54, 24, 0.28), transparent 22rem),
+          radial-gradient(circle at 28% 34%, rgba(28, 49, 38, 0.86), rgba(0, 0, 0, 0.96) 58%),
+          #020403;
+        background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px, auto, auto, auto;
+      }
+
+      .phone::before {
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.68), transparent 12%, transparent 88%, rgba(0, 0, 0, 0.68));
+      }
+
+      .stage {
+        width: min(100vw, 560px);
+        min-height: 100dvh;
+        display: block;
+        padding: 0;
+      }
+
+      .tuning-switch {
+        top: 20px;
+        left: calc(50% - min(50vw, 280px) + 14px);
+      }
+
+      .site-links {
+        top: 20px;
+        right: calc(50% - min(50vw, 280px) + 14px);
+      }
+
+      .meter-zone {
+        position: absolute;
+        inset: 46px 0 auto;
+        height: 330px;
+        min-height: 440px;
+        margin: 0;
+      }
+
+      .center-line {
+        top: 32px;
+        height: 360px;
+      }
+
+      .flat,
+      .sharp {
+        top: 266px;
+        font-size: 34px;
+      }
+
+      .flat { left: 44px; }
+      .sharp { right: 44px; }
+
+      .readout {
+        top: 112px;
+      }
+
+      .bottom-panel {
+        bottom: max(20px, env(safe-area-inset-bottom));
+        width: min(calc(100% - 40px), 420px);
+      }
+
+      .bottom-status {
+        font-size: 13px;
+      }
+
+      .bottom-status strong {
+        font-size: 28px;
+      }
+
+      .tuner-scale {
+        top: 172px;
+        left: 24px;
+        right: 24px;
+        height: 86px;
+      }
+
+      .scale-ticks {
+        height: 56px;
+      }
+
+      .scale-ticks span {
+        bottom: 13px;
+        height: 14px;
+      }
+
+      .scale-ticks .major {
+        height: 36px;
+      }
+
+      .scale-ticks .zero {
+        height: 54px;
+      }
+
+      .scale-labels {
+        height: 30px;
+        font-size: 15px;
+      }
+
+      .headstock-scene {
+        position: absolute;
+        left: 50%;
+        right: auto;
+        bottom: 0;
+        width: 430px;
+        height: 100dvh;
+        margin-top: 0;
+        transform: translateX(-50%);
+      }
+
+      .headstock {
+        top: auto;
+        bottom: 96px;
+        transform: translateX(-50%) scale(1.12);
+        transform-origin: bottom center;
+      }
+
+      .note-button {
+        width: 66px;
+        height: 66px;
+        font-size: 31px;
+      }
+
+      .note-c { left: 24px; top: auto; bottom: 380px; }
+      .note-e { right: 24px; top: auto; bottom: 380px; }
+      .note-g { left: 24px; top: auto; bottom: 252px; }
+      .note-a { right: 24px; top: auto; bottom: 252px; }
+
+      .volume-signal {
+        left: 20px;
+        bottom: 20px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .phone,
+      .stage {
+        min-height: 100dvh;
+      }
+
+      .headstock-scene {
+        transform: scale(0.94);
+        transform-origin: bottom center;
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <div class="stage">
+      <canvas class="pitch-trail" id="pitchTrail" aria-hidden="true"></canvas>
+
+      <div class="tuning-switch" aria-label="G string mode">
+        <button id="highG" class="active" type="button">High G</button>
+        <button id="lowG" type="button">Low G</button>
+      </div>
+
+      <div class="site-links">
+        <a class="github-link" href="https://github.com/magic-bunny/ukelele-helper" target="_blank" rel="noopener noreferrer" aria-label="Open project on GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.93.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 7c.85 0 1.7.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.23 10.23 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+          </svg>
+        </a>
+        <a href="https://hits.sh/magic-bunny.github.io/ukelele-helper/" target="_blank" rel="noopener noreferrer" title="Page view counter">
+          <img class="views-badge" src="https://hits.sh/magic-bunny.github.io/ukelele-helper.svg?label=views&color=80dd00&labelColor=111811" alt="Page views" loading="lazy" />
+        </a>
+      </div>
+
+      <section class="meter-zone" aria-live="polite">
+        <div class="center-line" id="needle" aria-hidden="true"></div>
+        <div class="tuner-scale" aria-hidden="true">
+          <div class="readout" id="tuneIcon"></div>
+          <div class="scale-ticks" id="scaleTicks"></div>
+          <div class="scale-labels">
+            <span style="left: 25%">-50</span>
+            <span style="left: 50%">0</span>
+            <span style="left: 75%">+50</span>
+          </div>
+        </div>
+        <span class="flat">♭</span>
+        <span class="sharp">♯</span>
+      </section>
+
+      <section class="headstock-scene" aria-label="Four ukulele strings">
+        <button class="note-button note-c" data-string="C" type="button">
+          <span>C</span>
+          <small>261.63 Hz</small>
+          <span class="hint">String 3</span>
+        </button>
+        <button class="note-button note-e" data-string="E" type="button">
+          <span>E</span>
+          <small>329.63 Hz</small>
+          <span class="hint">String 2</span>
+        </button>
+        <button class="note-button note-g active" data-string="G" type="button">
+          <span>G</span>
+          <small id="gFreq">392.00 Hz</small>
+          <span class="hint">String 4, High G</span>
+        </button>
+        <button class="note-button note-a" data-string="A" type="button">
+          <span>A</span>
+          <small>440.00 Hz</small>
+          <span class="hint">String 1</span>
+        </button>
+
+        <div class="headstock" aria-hidden="true">
+          <div class="wood"></div>
+          <div class="brand">UKULELE</div>
+          <div class="peg peg-left peg-1"></div>
+          <div class="peg peg-right peg-2"></div>
+          <div class="peg peg-left peg-3"></div>
+          <div class="peg peg-right peg-4"></div>
+          <div class="nut"></div>
+          <div class="fretboard"></div>
+          <div class="string s1"></div>
+          <div class="string s2"></div>
+          <div class="string s3"></div>
+          <div class="string s4"></div>
+        </div>
+      </section>
+
+      <section class="bottom-panel" aria-live="polite">
+        <div class="bottom-status">
+          <strong id="noteName">—</strong>
+          <span id="targetText">Waiting for microphone</span><br />
+          <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
+          <span id="direction">Play an open string</span>
+        </div>
+      </section>
+
+      <div class="volume-signal" aria-label="Input level" title="Input level">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STRINGS_HIGH_G = [
+      { key: 'G', note: 'G4', freq: 392.00, hint: 'String 4, High G' },
+      { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
+      { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
+    ];
+
+    const STRINGS_LOW_G = [
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'String 4, Low G' },
+      { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
+      { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
+    ];
+
+    const highGButton = document.querySelector('#highG');
+    const lowGButton = document.querySelector('#lowG');
+    const noteName = document.querySelector('#noteName');
+    const targetText = document.querySelector('#targetText');
+    const freqText = document.querySelector('#freqText');
+    const centsText = document.querySelector('#centsText');
+    const direction = document.querySelector('#direction');
+    const needle = document.querySelector('#needle');
+    const readout = document.querySelector('.readout');
+    const tuneIcon = document.querySelector('#tuneIcon');
+    const levelBars = [...document.querySelectorAll('.volume-signal span')];
+    const gFreq = document.querySelector('#gFreq');
+    const stringCards = [...document.querySelectorAll('.note-button')];
+    const scaleTicks = document.querySelector('#scaleTicks');
+    const pitchTrail = document.querySelector('#pitchTrail');
+    const trailContext = pitchTrail.getContext('2d');
+
+    let audioContext;
+    let analyser;
+    let sourceNode;
+    let gainNode;
+    let mediaStream;
+    let rafId;
+    let buffer;
+    let manualString = null;
+    let stringSet = STRINGS_HIGH_G;
+    let recentPitches = [];
+    let lastGoodPitchAt = 0;
+    let tuneChimeArmed = true;
+    let lastChimeAt = 0;
+    let lastChimeTarget = null;
+    let lastValidPitchAt = 0;
+    let lastTrailFrameAt = 0;
+    let lastRms = 0;
+    let activeTrailSegment = null;
+    let trailNotes = [];
+    let trailWidth = 0;
+    let trailHeight = 0;
+    let trailDpr = 1;
+    const MIN_INPUT_RMS = 0.0009;
+    const MIN_FREQUENCY = 150;
+    const MAX_FREQUENCY = 560;
+    const YIN_THRESHOLD = 0.24;
+    const MAX_YIN_VALUE = 0.58;
+    const PITCH_WINDOW = 3;
+    const METER_RANGE_CENTS = 100;
+    const METER_FADE_CENTS = 50;
+    const METER_TRAVEL_PERCENT = 48;
+    const TICK_STEP_CENTS = 5;
+    const PREAMP_GAIN = 2.2;
+    const SUSTAIN_HOLD_MS = 2600;
+    const CHIME_COOLDOWN_MS = 1400;
+    const TRAIL_SPEED_PX_PER_MS = 0.024;
+    const TRAIL_NOTE_LENGTH = 20;
+    const TRAIL_MERGE_CENTS = 5;
+    const TRAIL_COLORS = {
+      green: '#80dd00',
+      yellow: '#ffd24a',
+      red: '#ff4d3f'
+    };
+    let tickMarks = [];
+
+    function centsOff(frequency, target) {
+      return 1200 * Math.log2(frequency / target);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function meterPosition(cents) {
+      const limited = clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS);
+      return 50 + limited * (METER_TRAVEL_PERCENT / METER_RANGE_CENTS);
+    }
+
+    function buildScaleTicks() {
+      const fragment = document.createDocumentFragment();
+
+      for (let cents = -METER_RANGE_CENTS; cents <= METER_RANGE_CENTS; cents += TICK_STEP_CENTS) {
+        const tick = document.createElement('span');
+        const distance = Math.abs(cents) / METER_RANGE_CENTS;
+        const opacity = 0.06 + (1 - Math.pow(distance, 1.65)) * 0.64;
+        tick.dataset.cents = String(cents);
+        tick.className = 'minor';
+        if (cents % 25 === 0) tick.className = 'mid';
+        if (cents % 50 === 0) tick.className = 'major';
+        if (cents === 0) tick.className = 'zero';
+        tick.style.left = `${meterPosition(cents)}%`;
+        tick.style.opacity = cents === 0 ? '1' : opacity.toFixed(2);
+        fragment.append(tick);
+      }
+
+      scaleTicks.append(fragment);
+      tickMarks = [...scaleTicks.querySelectorAll('span')];
+    }
+
+    function highlightTick(cents) {
+      const nearest = clamp(
+        Math.round(cents / TICK_STEP_CENTS) * TICK_STEP_CENTS,
+        -METER_RANGE_CENTS,
+        METER_RANGE_CENTS
+      );
+      tickMarks.forEach((tick) => {
+        tick.classList.toggle('active-tick', Number(tick.dataset.cents) === nearest);
+      });
+    }
+
+    function clearTickHighlight() {
+      tickMarks.forEach((tick) => tick.classList.remove('active-tick'));
+    }
+
+    function hasRecentReading() {
+      return lastGoodPitchAt && performance.now() - lastGoodPitchAt < SUSTAIN_HOLD_MS;
+    }
+
+    function holdRecentReading(message) {
+      if (!hasRecentReading()) return false;
+      direction.textContent = message;
+      return true;
+    }
+
+    function setPointer(position, color) {
+      const left = `${position}%`;
+      needle.style.left = left;
+      readout.style.left = left;
+      document.documentElement.style.setProperty('--needle-color', color);
+    }
+
+    function clearPointerState() {
+      setPointer(50, 'var(--green)');
+      tuneIcon.classList.remove('in-tune');
+      clearTickHighlight();
+    }
+
+    function playTuneChime(target, now) {
+      if (!audioContext || now - lastChimeAt < CHIME_COOLDOWN_MS) return;
+
+      const start = audioContext.currentTime;
+      const master = audioContext.createGain();
+      const notes = [target.freq * 2, target.freq * 3].map((freq) => clamp(freq, 520, 1760));
+      master.gain.setValueAtTime(0.0001, start);
+      master.gain.exponentialRampToValueAtTime(0.055, start + 0.018);
+      master.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+      master.connect(audioContext.destination);
+
+      notes.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const voice = audioContext.createGain();
+        oscillator.type = index === 0 ? 'sine' : 'triangle';
+        oscillator.frequency.setValueAtTime(freq, start);
+        voice.gain.setValueAtTime(index === 0 ? 0.72 : 0.32, start);
+        oscillator.connect(voice);
+        voice.connect(master);
+        oscillator.start(start + index * 0.035);
+        oscillator.stop(start + 0.26 + index * 0.035);
+        oscillator.addEventListener('ended', () => {
+          oscillator.disconnect();
+          voice.disconnect();
+        });
+      });
+
+      window.setTimeout(() => master.disconnect(), 420);
+      lastChimeAt = now;
+      lastChimeTarget = target.note;
+    }
+
+    function resizePitchTrail() {
+      const rect = pitchTrail.getBoundingClientRect();
+      const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+      const nextWidth = Math.max(1, Math.round(rect.width * nextDpr));
+      const nextHeight = Math.max(1, Math.round(rect.height * nextDpr));
+
+      if (nextWidth === trailWidth && nextHeight === trailHeight && nextDpr === trailDpr) return;
+
+      trailDpr = nextDpr;
+      trailWidth = nextWidth;
+      trailHeight = nextHeight;
+      pitchTrail.width = trailWidth;
+      pitchTrail.height = trailHeight;
+      trailContext.setTransform(trailDpr, 0, 0, trailDpr, 0, 0);
+      trailContext.clearRect(0, 0, rect.width, rect.height);
+    }
+
+    function scrollPitchTrail(now) {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+      if (!lastTrailFrameAt) {
+        lastTrailFrameAt = now;
+        return;
+      }
+
+      const delta = clamp((now - lastTrailFrameAt) * TRAIL_SPEED_PX_PER_MS, 0, 2.6);
+      lastTrailFrameAt = now;
+      if (delta <= 0) return;
+
+      trailNotes.forEach((note) => {
+        note.y += delta;
+      });
+      trailNotes = trailNotes.filter((note) => note.y < pitchTrail.clientHeight + 24);
+      renderPitchTrail();
+    }
+
+    function trailStartY() {
+      const stageRect = pitchTrail.getBoundingClientRect();
+      const scaleRect = scaleTicks.getBoundingClientRect();
+      return scaleRect.top - stageRect.top + scaleRect.height / 2;
+    }
+
+    function drawTrailLine(x, y, color, length, alpha = 0.84) {
+      const tailLength = length * 1.9;
+      const gradient = trailContext.createLinearGradient(x, y - tailLength, x, y + length / 2);
+      gradient.addColorStop(0, 'rgba(128, 221, 0, 0)');
+      gradient.addColorStop(0.62, color);
+      gradient.addColorStop(1, color);
+
+      trailContext.save();
+      trailContext.lineCap = 'round';
+      trailContext.strokeStyle = gradient;
+      trailContext.shadowColor = color;
+      trailContext.shadowBlur = 12;
+      trailContext.globalAlpha = alpha;
+      trailContext.lineWidth = 2;
+      trailContext.beginPath();
+      trailContext.moveTo(x, y - tailLength);
+      trailContext.lineTo(x, y + length / 2);
+      trailContext.stroke();
+      trailContext.globalAlpha = alpha * 0.24;
+      trailContext.lineWidth = 4;
+      trailContext.beginPath();
+      trailContext.moveTo(x, y - tailLength);
+      trailContext.lineTo(x, y + length / 2);
+      trailContext.stroke();
+      trailContext.restore();
+    }
+
+    function renderPitchTrail() {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+      const rect = pitchTrail.getBoundingClientRect();
+      trailContext.clearRect(0, 0, rect.width, rect.height);
+      trailNotes.forEach((note) => {
+        drawTrailLine(note.x, note.y, note.color, TRAIL_NOTE_LENGTH, note.alpha);
+      });
+    }
+
+    function trailXForCents(cents) {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+      const rect = pitchTrail.getBoundingClientRect();
+      return rect.width * (meterPosition(cents) / 100);
+    }
+
+    function quantizedTrailCents(cents) {
+      return clamp(
+        Math.round(cents / TRAIL_MERGE_CENTS) * TRAIL_MERGE_CENTS,
+        -METER_RANGE_CENTS,
+        METER_RANGE_CENTS
+      );
+    }
+
+    function updateTrailSegment(frequency, cents, color, rms, now) {
+      const bucket = quantizedTrailCents(cents);
+      const target = getSelectedTarget(frequency);
+      const existingNote = trailNotes.find((note) => (
+        note.targetKey === target.key
+        && note.bucket === bucket
+      ));
+
+      if (existingNote) {
+        // One visible note per 5-cent tick: update the note object, then repaint the canvas once.
+        existingNote.color = color;
+        existingNote.alpha = Math.min(0.9, existingNote.alpha + 0.02);
+        existingNote.updatedAt = now;
+        activeTrailSegment = existingNote;
+      } else {
+        activeTrailSegment = {
+          targetKey: target.key,
+          bucket,
+          x: trailXForCents(bucket),
+          y: trailStartY(),
+          color,
+          startedAt: now,
+          lastDrawAt: now,
+          updatedAt: now,
+          length: TRAIL_NOTE_LENGTH,
+          alpha: 0.72
+        };
+        trailNotes.push(activeTrailSegment);
+      }
+
+      activeTrailSegment.lastDrawAt = now;
+      lastValidPitchAt = now;
+      renderPitchTrail();
+    }
+
+    function getSelectedTarget(frequency) {
+      if (manualString) {
+        return stringSet.find((item) => item.key === manualString);
+      }
+
+      return stringSet.reduce((best, item) => {
+        const distance = Math.abs(centsOff(frequency, item.freq));
+        return distance < best.distance ? { item, distance } : best;
+      }, { item: stringSet[0], distance: Infinity }).item;
+    }
+
+    function isNearUkuleleString(frequency) {
+      const target = getSelectedTarget(frequency);
+      return Math.abs(centsOff(frequency, target.freq)) <= METER_RANGE_CENTS;
+    }
+
+    function setActiveString(key) {
+      stringCards.forEach((card) => card.classList.toggle('active', card.dataset.string === key));
+    }
+
+    function updateGMode(isLowG) {
+      stringSet = isLowG ? STRINGS_LOW_G : STRINGS_HIGH_G;
+      highGButton.classList.toggle('active', !isLowG);
+      lowGButton.classList.toggle('active', isLowG);
+      gFreq.textContent = `${stringSet[0].freq.toFixed(2)} Hz`;
+      document.querySelector('[data-string="G"] .hint').textContent = stringSet[0].hint;
+      if (manualString === 'G') {
+        targetText.textContent = `Target ${stringSet[0].note} · ${stringSet[0].freq.toFixed(2)} Hz`;
+      }
+    }
+
+    function pointerColorForCents(cents) {
+      if (Math.abs(cents) <= 5) return 'var(--green)';
+      if (Math.abs(cents) <= 15) return 'var(--yellow)';
+      return 'var(--red)';
+    }
+
+    function trailColorForCents(cents) {
+      if (Math.abs(cents) <= 5) return TRAIL_COLORS.green;
+      if (Math.abs(cents) <= 15) return TRAIL_COLORS.yellow;
+      return TRAIL_COLORS.red;
+    }
+
+    function updateReadout(frequency) {
+      const target = getSelectedTarget(frequency);
+      const cents = centsOff(frequency, target.freq);
+      const limited = clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS);
+      const isInTune = Math.abs(cents) <= 5;
+      const isNear = Math.abs(cents) <= 15;
+      const isFar = Math.abs(cents) > METER_FADE_CENTS;
+      const pointerColor = pointerColorForCents(cents);
+      const pointerPosition = meterPosition(limited);
+
+      if (target.note !== lastChimeTarget) tuneChimeArmed = true;
+
+      setActiveString(target.key);
+      noteName.textContent = target.key;
+      targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
+      freqText.textContent = `${frequency.toFixed(2)} Hz`;
+      centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
+      setPointer(pointerPosition, pointerColor);
+      tuneIcon.classList.toggle('in-tune', isInTune);
+      highlightTick(limited);
+      lastGoodPitchAt = performance.now();
+
+      if (isInTune) {
+        if (tuneChimeArmed) {
+          playTuneChime(target, performance.now());
+          tuneChimeArmed = false;
+        }
+        direction.textContent = 'In tune';
+      } else {
+        if (Math.abs(cents) > 9) tuneChimeArmed = true;
+        direction.textContent = cents < 0
+          ? isFar ? 'Very flat, tighten the string' : isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string'
+          : isFar ? 'Very sharp, loosen the string' : isNear ? 'A little sharp, loosen gently' : 'Sharp, loosen the string';
+      }
+    }
+
+    function getRms(samples) {
+      let rms = 0;
+      for (let i = 0; i < samples.length; i += 1) {
+        rms += samples[i] * samples[i];
+      }
+      return Math.sqrt(rms / samples.length);
+    }
+
+    function updateLevel(rms) {
+      const percent = clamp((rms / 0.045) * 100, 0, 100);
+      const activeBars = Math.ceil(percent / 25);
+      levelBars.forEach((bar, index) => {
+        bar.classList.toggle('active', index < activeBars);
+      });
+    }
+
+    function detectPitch(samples, sampleRate, rms) {
+      if (rms < MIN_INPUT_RMS) return null;
+
+      const minLag = Math.floor(sampleRate / MAX_FREQUENCY);
+      const maxLag = Math.floor(sampleRate / MIN_FREQUENCY);
+      const yin = new Float32Array(maxLag + 1);
+      let runningSum = 0;
+
+      for (let lag = 1; lag <= maxLag; lag += 1) {
+        let difference = 0;
+        for (let i = 0; i < samples.length - maxLag; i += 1) {
+          const delta = samples[i] - samples[i + lag];
+          difference += delta * delta;
+        }
+
+        runningSum += difference;
+        yin[lag] = runningSum === 0 ? 1 : difference * lag / runningSum;
+      }
+
+      let bestLag = -1;
+      let bestValue = Infinity;
+
+      for (let lag = minLag; lag <= maxLag; lag += 1) {
+        if (yin[lag] < bestValue) {
+          bestValue = yin[lag];
+          bestLag = lag;
+        }
+
+        if (yin[lag] < YIN_THRESHOLD) {
+          while (lag + 1 <= maxLag && yin[lag + 1] < yin[lag]) {
+            lag += 1;
+          }
+          bestLag = lag;
+          bestValue = yin[lag];
+          break;
+        }
+      }
+
+      if (bestLag < 0 || bestValue > MAX_YIN_VALUE) return null;
+
+      // Parabolic interpolation makes the detected pitch less jumpy between sample indices.
+      const prev = yin[bestLag - 1] ?? yin[bestLag];
+      const curr = yin[bestLag];
+      const next = yin[bestLag + 1] ?? yin[bestLag];
+      const denominator = 2 * (2 * curr - prev - next);
+      const shift = denominator ? (next - prev) / denominator : 0;
+      const refinedLag = bestLag + clamp(shift, -1, 1);
+      return sampleRate / refinedLag;
+    }
+
+    function stablePitch(pitch) {
+      recentPitches.push(pitch);
+      if (recentPitches.length > PITCH_WINDOW) recentPitches.shift();
+      const sorted = [...recentPitches].sort((a, b) => a - b);
+      return sorted[Math.floor(sorted.length / 2)];
+    }
+
+    function loop() {
+      const now = performance.now();
+      scrollPitchTrail(now);
+      analyser.getFloatTimeDomainData(buffer);
+      const rms = getRms(buffer);
+      updateLevel(rms);
+      const pitch = detectPitch(buffer, audioContext.sampleRate, rms);
+
+      if (pitch) {
+        const smoothedPitch = stablePitch(pitch);
+        if (isNearUkuleleString(smoothedPitch)) {
+          updateReadout(smoothedPitch);
+          const target = getSelectedTarget(smoothedPitch);
+          const cents = centsOff(smoothedPitch, target.freq);
+          updateTrailSegment(smoothedPitch, cents, trailColorForCents(cents), rms, now);
+        } else {
+          direction.textContent = 'Play an open ukulele string';
+          clearPointerState();
+          recentPitches = [];
+          activeTrailSegment = null;
+        }
+      } else if (rms >= MIN_INPUT_RMS) {
+        recentPitches = [];
+        activeTrailSegment = null;
+        if (!holdRecentReading('Sustain fading, pluck again')) {
+          direction.textContent = 'Signal found, play a clearer note';
+          clearPointerState();
+        }
+      } else {
+        recentPitches = [];
+        activeTrailSegment = null;
+        if (!holdRecentReading('Sustain fading, pluck again')) {
+          direction.textContent = 'Quiet input, move closer or pluck louder';
+          clearPointerState();
+        }
+      }
+
+      lastRms = rms;
+      rafId = requestAnimationFrame(loop);
+    }
+
+    async function startMic() {
+      if (mediaStream) return;
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        direction.textContent = 'This browser does not support microphone input';
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+        sourceNode = audioContext.createMediaStreamSource(mediaStream);
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = PREAMP_GAIN;
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 4096;
+        analyser.smoothingTimeConstant = 0;
+        buffer = new Float32Array(analyser.fftSize);
+        sourceNode.connect(gainNode);
+        gainNode.connect(analyser);
+        loop();
+      } catch (error) {
+        mediaStream = null;
+        direction.textContent = error.name === 'NotAllowedError'
+          ? 'Microphone blocked, click anywhere to retry'
+          : 'Microphone unavailable, use localhost or HTTPS';
+      }
+    }
+
+    function stopMic() {
+      if (!mediaStream) return;
+      cancelAnimationFrame(rafId);
+      mediaStream.getTracks().forEach((track) => track.stop());
+      mediaStream = null;
+      sourceNode = null;
+      gainNode = null;
+      recentPitches = [];
+      lastGoodPitchAt = 0;
+      lastValidPitchAt = 0;
+      tuneChimeArmed = true;
+      activeTrailSegment = null;
+      trailNotes = [];
+      direction.textContent = 'Play an open string';
+      clearPointerState();
+      updateLevel(0);
+    }
+
+    highGButton.addEventListener('click', () => updateGMode(false));
+    lowGButton.addEventListener('click', () => updateGMode(true));
+
+    stringCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        manualString = manualString === card.dataset.string ? null : card.dataset.string;
+        if (manualString) {
+          const target = stringSet.find((item) => item.key === manualString);
+          tuneChimeArmed = true;
+          setActiveString(target.key);
+          noteName.textContent = target.key;
+          clearPointerState();
+          targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
+          direction.textContent = `${target.key} locked`;
+        } else {
+          direction.textContent = 'Auto string matching';
+        }
+      });
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopMic();
+      } else {
+        startMic();
+      }
+    });
+
+    document.addEventListener('pointerdown', () => {
+      if (!mediaStream) startMic();
+    }, { passive: true });
+
+    window.addEventListener('resize', resizePitchTrail);
+
+    buildScaleTicks();
+    resizePitchTrail();
+    startMic();
+  </script>
+</body>
 </html>
