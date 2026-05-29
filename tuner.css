@@ -798,3 +798,372 @@
   background: radial-gradient(circle, #f7f1dc 0 38%, #b9a88a 39% 48%, #1f1712 49% 52%, #8a5a35 53%);
   border-color: rgba(255, 255, 255, 0.72);
 }
+
+/* Multi-instrument pages: GuitarTuna-inspired picker/tuner chrome. ukulele.html is standalone and does not load this file. */
+.tuner-header {
+  position: absolute;
+  z-index: 30;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: grid;
+  grid-template-columns: 38px 1fr auto 38px;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.tuner-header > * { pointer-events: auto; }
+
+.tuner-header .back-link,
+.tuner-header .github-link {
+  position: static;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.9);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.tuner-header .back-link {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.tuner-header .github-link svg {
+  width: 21px;
+  height: 21px;
+  fill: currentColor;
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.logo-mark {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #071006;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.page-title {
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+  text-align: right;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.78);
+}
+
+.page-title strong {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.page-title span {
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tuning-switch {
+  top: 58px;
+  left: 10px;
+  z-index: 29;
+}
+
+.meter-zone {
+  z-index: 10;
+}
+
+.pitch-trail {
+  z-index: 2;
+}
+
+.center-line {
+  top: 34px;
+  height: 182px;
+  z-index: 5;
+}
+
+.headstock-scene {
+  z-index: 12;
+  height: 470px;
+  pointer-events: none;
+}
+
+#stringButtons,
+.note-button {
+  pointer-events: auto;
+}
+
+.instrument-body {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: -78px;
+  width: 230px;
+  height: 260px;
+  transform: translateX(-50%);
+  border-radius: 48% 48% 42% 42%;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(8, 4, 2, 0.82) 0 18px, transparent 19px),
+    radial-gradient(circle at 31% 34%, rgba(255, 239, 183, 0.24), transparent 0 44px),
+    linear-gradient(90deg, #6c3217, #e39a51 43%, #f0b965 50%, #b85e28 67%, #4a2112);
+  border: 2px solid rgba(246, 202, 128, 0.68);
+  box-shadow: inset 21px 0 32px rgba(69, 26, 10, 0.42), inset -20px 0 38px rgba(41, 15, 6, 0.34), 0 26px 34px rgba(0, 0, 0, 0.58);
+}
+
+.body-shine {
+  position: absolute;
+  inset: 16px auto auto 42px;
+  width: 62px;
+  height: 188px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255, 241, 198, 0.2), transparent 72%);
+  transform: rotate(14deg);
+}
+
+.soundhole {
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  width: 54px;
+  height: 54px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #090604 0 48%, #d4a45e 50% 56%, #241008 58%);
+}
+
+.tailpiece {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  width: 82px;
+  height: 16px;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: linear-gradient(#f5dfb8, #73421f);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.32);
+}
+
+.headstock {
+  z-index: 9;
+  bottom: 72px;
+  width: 146px;
+  height: 352px;
+  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.52));
+}
+
+.wood {
+  width: 146px;
+  height: 352px;
+  clip-path: polygon(36% 0, 64% 0, 70% 18%, 66% 29%, 77% 47%, 66% 64%, 62% 100%, 38% 100%, 34% 64%, 23% 47%, 34% 29%, 30% 18%);
+  border-radius: 36% 36% 18% 18%;
+}
+
+.brand {
+  top: 78px;
+  color: rgba(255, 246, 214, 0.88);
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(75, 28, 8, 0.72), 0 0 12px rgba(255, 222, 148, 0.42);
+}
+
+.nut {
+  left: 35px;
+  right: 35px;
+  bottom: 64px;
+}
+
+.fretboard {
+  left: 41px;
+  right: 41px;
+  bottom: -96px;
+  height: 168px;
+}
+
+.string {
+  top: 28px;
+  left: var(--x, 50%);
+  bottom: -96px;
+  width: var(--string-weight, 1.4px);
+  transform: translateX(-50%);
+  background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(181, 183, 171, 0.72));
+  z-index: 10;
+}
+
+.peg {
+  z-index: 11;
+  width: 24px;
+  height: 24px;
+}
+
+.peg::before {
+  top: 8px;
+  width: 38px;
+  height: 8px;
+}
+
+.peg::after {
+  top: -9px;
+  width: 28px;
+  height: 46px;
+}
+
+.peg-left { left: 14px; }
+.peg-right { right: 14px; }
+.peg-left::before { right: 12px; }
+.peg-left::after { right: 34px; }
+.peg-right::before { left: 12px; }
+.peg-right::after { left: 34px; }
+
+.note-button {
+  width: 54px;
+  height: 54px;
+  font-size: 26px;
+  z-index: 14;
+}
+
+.instrument-guitar-12 .note-button,
+.instrument-mandolin .note-button {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+}
+
+.instrument-guitar-7 .note-button,
+.instrument-bass-5 .note-button,
+.instrument-banjo-5 .note-button {
+  width: 48px;
+  height: 48px;
+  font-size: 23px;
+}
+
+.family-guitar .instrument-body {
+  width: 242px;
+  height: 272px;
+  border-radius: 44% 44% 48% 48%;
+  clip-path: polygon(50% 0, 62% 6%, 69% 22%, 92% 31%, 98% 54%, 79% 70%, 73% 94%, 50% 100%, 27% 94%, 21% 70%, 2% 54%, 8% 31%, 31% 22%, 38% 6%);
+}
+
+.family-bass .instrument-body {
+  width: 206px;
+  height: 292px;
+  border-radius: 42% 42% 48% 48%;
+  clip-path: polygon(50% 0, 69% 12%, 80% 38%, 96% 51%, 82% 66%, 75% 95%, 50% 100%, 25% 95%, 18% 66%, 4% 51%, 20% 38%, 31% 12%);
+  background: radial-gradient(circle at 50% 38%, rgba(8, 4, 2, 0.8) 0 17px, transparent 18px), linear-gradient(90deg, #2b1810, #9a6b3a 42%, #d9bd82 55%, #704720);
+}
+
+.family-small-guitar .instrument-body {
+  width: 190px;
+  height: 230px;
+  bottom: -54px;
+}
+
+.family-violin .instrument-body,
+.family-cello .instrument-body {
+  width: 198px;
+  height: 302px;
+  bottom: -76px;
+  clip-path: polygon(50% 0, 68% 8%, 77% 28%, 98% 41%, 78% 53%, 91% 77%, 66% 100%, 50% 90%, 34% 100%, 9% 77%, 22% 53%, 2% 41%, 23% 28%, 32% 8%);
+  background: radial-gradient(circle at 50% 40%, rgba(7, 4, 3, 0.72) 0 15px, transparent 16px), linear-gradient(90deg, #4d1d12, #a94622 38%, #ef9c58 55%, #7b2c16);
+}
+
+.family-cello .instrument-body {
+  width: 236px;
+  height: 340px;
+  bottom: -102px;
+}
+
+.family-mandolin .instrument-body {
+  width: 196px;
+  height: 256px;
+  bottom: -62px;
+  clip-path: polygon(50% 0, 70% 12%, 91% 44%, 98% 82%, 50% 100%, 2% 82%, 9% 44%, 30% 12%);
+}
+
+.family-balalaika .instrument-body {
+  width: 260px;
+  height: 220px;
+  bottom: -42px;
+  clip-path: polygon(50% 2%, 98% 96%, 2% 96%);
+  border-radius: 14px 14px 28px 28px;
+}
+
+.family-banjo .instrument-body {
+  width: 222px;
+  height: 222px;
+  bottom: -48px;
+  border-radius: 50%;
+  clip-path: none;
+  background: radial-gradient(circle, #f8f1db 0 47%, #bca67d 48% 54%, #1f1712 55% 58%, #8a5a35 59% 100%);
+  border-color: rgba(255, 255, 255, 0.78);
+}
+
+.family-banjo .soundhole,
+.family-banjo .body-shine,
+.family-balalaika .soundhole { display: none; }
+
+.instrument-mandolin .headstock,
+.instrument-guitar-12 .headstock {
+  width: 164px;
+}
+
+.instrument-mandolin .wood,
+.instrument-guitar-12 .wood {
+  width: 164px;
+}
+
+
+.instrument-guitar-12 .peg {
+  width: 20px;
+  height: 20px;
+}
+
+.instrument-guitar-12 .peg::before { width: 31px; }
+.instrument-guitar-12 .peg::after { width: 23px; height: 38px; }
+
+@media (min-width: 860px) {
+  .tuner-header {
+    top: 18px;
+    left: calc(50% - min(50vw, 280px) + 14px);
+    right: calc(50% - min(50vw, 280px) + 14px);
+  }
+
+  .tuning-switch {
+    top: 66px;
+    left: calc(50% - min(50vw, 280px) + 14px);
+  }
+
+  .center-line {
+    top: 116px;
+    height: 210px;
+  }
+
+  .headstock-scene {
+    height: 100dvh;
+  }
+
+  .headstock {
+    bottom: 92px;
+  }
+}

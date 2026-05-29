@@ -6,11 +6,13 @@
   <title>Instrument Tuner</title>
   <style>
     :root {
-      --bg: #111316;
-      --card: #2b2d33;
-      --green: #18e0a0;
-      --white: #f7f7f4;
-      --muted: rgba(247, 247, 244, 0.68);
+      --bg: #101215;
+      --card: #2c2f35;
+      --card-2: #24272d;
+      --green: #80dd00;
+      --white: #f7f7f0;
+      --muted: rgba(247, 247, 240, 0.66);
+      --ink: #050607;
     }
 
     * { box-sizing: border-box; }
@@ -21,33 +23,86 @@
       color: var(--white);
       font-family: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
       background:
-        radial-gradient(circle at 50% -20%, rgba(32, 50, 44, 0.46), transparent 24rem),
-        repeating-linear-gradient(35deg, rgba(255,255,255,0.018) 0 2px, transparent 2px 7px),
-        repeating-linear-gradient(145deg, rgba(0,0,0,0.22) 0 1px, transparent 1px 6px),
-        #111316;
+        radial-gradient(circle at 50% -14%, rgba(128, 221, 0, 0.16), transparent 20rem),
+        radial-gradient(circle at 92% 8%, rgba(220, 143, 61, 0.13), transparent 18rem),
+        repeating-linear-gradient(35deg, rgba(255,255,255,0.018) 0 2px, transparent 2px 8px),
+        #101215;
     }
 
     .home {
-      width: min(100%, 760px);
+      width: min(100%, 820px);
       margin: 0 auto;
-      padding: 28px 18px 44px;
+      padding: 22px 14px 46px;
     }
 
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 4px 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: lowercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #0a1005;
+      font-size: 25px;
+      box-shadow: 0 0 22px rgba(128, 221, 0, 0.24);
+    }
+
+    .github {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: rgba(255,255,255,0.88);
+      background: rgba(0,0,0,0.26);
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .github:hover,
+    .github:focus-visible {
+      color: var(--green);
+      border-color: rgba(128, 221, 0, 0.5);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .github svg { width: 21px; height: 21px; fill: currentColor; }
+
     .hero {
-      padding: 10px 14px 24px;
-      text-align: center;
+      padding: 0 4px 24px;
     }
 
     .hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(32px, 8vw, 54px);
-      letter-spacing: -0.06em;
-      text-shadow: 0 3px 0 #000;
+      margin: 0;
+      max-width: 10ch;
+      font-size: clamp(42px, 11vw, 78px);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+      text-shadow: 0 4px 0 #000;
     }
 
     .hero p {
-      margin: 0 auto;
-      max-width: 34rem;
+      margin: 14px 0 0;
+      max-width: 36rem;
       color: var(--muted);
       font-size: 15px;
       line-height: 1.55;
@@ -56,117 +111,184 @@
     .instrument-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 26px;
+      gap: 14px;
     }
 
     .instrument-card {
-      min-height: 318px;
-      padding: 30px 18px 20px;
-      border-radius: 9px;
-      background: linear-gradient(180deg, #30323a, #292b31);
+      position: relative;
+      min-height: 258px;
+      padding: 18px 12px 16px;
+      overflow: hidden;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), transparent 34%),
+        linear-gradient(180deg, var(--card), var(--card-2));
       color: var(--white);
       text-align: center;
       text-decoration: none;
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255,255,255,0.03);
-      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      box-shadow: 0 16px 30px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    }
+
+    .instrument-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 20% -54px;
+      height: 118px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(128, 221, 0, 0.13), transparent 62%);
+      opacity: 0;
+      transition: opacity 150ms ease;
     }
 
     .instrument-card:hover,
     .instrument-card:focus-visible {
       transform: translateY(-3px);
-      background: linear-gradient(180deg, #353840, #2b2e34);
-      box-shadow: 0 20px 42px rgba(0, 0, 0, 0.42), 0 0 0 2px rgba(24, 224, 160, 0.34);
+      background: linear-gradient(180deg, #353941, #292c32);
+      box-shadow: 0 22px 42px rgba(0,0,0,0.44), 0 0 0 2px rgba(128,221,0,0.28);
       outline: none;
     }
 
-    .instrument-art {
+    .instrument-card:hover::after,
+    .instrument-card:focus-visible::after { opacity: 1; }
+
+    .art {
       position: relative;
-      display: grid;
-      place-items: center;
-      width: min(55vw, 174px);
-      height: min(55vw, 174px);
-      margin: 0 auto 26px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 34% 30%, rgba(255,255,255,0.34), transparent 0 18%, transparent 32%),
-        linear-gradient(135deg, var(--tone-a), var(--tone-b) 52%, var(--tone-c));
-      overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 10px 28px rgba(0,0,0,0.28);
-      isolation: isolate;
+      display: block;
+      width: min(42vw, 156px);
+      height: 156px;
+      margin: 0 auto 16px;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,0.32));
     }
 
-    .instrument-art::before,
-    .instrument-art::after {
+    .art::before,
+    .art::after,
+    .neck,
+    .head,
+    .strings {
       content: "";
       position: absolute;
-      width: 180px;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.72);
-      transform: rotate(var(--angle));
-      box-shadow: 0 20px 0 rgba(20,20,20,0.68), 0 -20px 0 rgba(20,20,20,0.5);
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    .instrument-art::after {
-      width: 80px;
-      height: 96px;
-      border-radius: 46% 46% 42% 42%;
-      background: linear-gradient(90deg, rgba(90,43,18,0.96), rgba(214,129,55,0.92), rgba(78,37,17,0.96));
-      transform: rotate(calc(var(--angle) + 82deg));
-      box-shadow: inset 12px 0 24px rgba(255,255,255,0.13), inset -10px 0 22px rgba(0,0,0,0.32);
-      z-index: -1;
+    .art::before {
+      bottom: 0;
+      width: var(--body-w, 112px);
+      height: var(--body-h, 104px);
+      border-radius: var(--body-radius, 46% 46% 42% 42%);
+      clip-path: var(--clip, none);
+      background:
+        radial-gradient(circle at 50% 44%, rgba(4,4,3,0.82) 0 13px, transparent 14px),
+        radial-gradient(circle at 34% 24%, rgba(255,244,189,0.26), transparent 0 30px),
+        linear-gradient(90deg, var(--tone-a), var(--tone-b) 45%, var(--tone-c) 56%, var(--tone-d));
+      border: 1px solid rgba(255, 228, 163, 0.42);
+    }
+
+    .neck {
+      bottom: 82px;
+      width: var(--neck-w, 25px);
+      height: var(--neck-h, 78px);
+      border-radius: 10px 10px 3px 3px;
+      background: linear-gradient(90deg, #2a1a10, #100907 52%, #2a190f);
+      box-shadow: inset 7px 0 10px rgba(255,255,255,0.05);
+    }
+
+    .head {
+      bottom: 139px;
+      width: var(--head-w, 47px);
+      height: var(--head-h, 40px);
+      border-radius: var(--head-radius, 18px 18px 10px 10px);
+      clip-path: var(--head-clip, none);
+      background: linear-gradient(90deg, var(--tone-a), var(--tone-b), var(--tone-d));
+      box-shadow: 0 0 0 1px rgba(255,224,150,0.28) inset;
+    }
+
+    .strings {
+      bottom: 21px;
+      width: var(--string-w, 54px);
+      height: 128px;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.68) 0 1px, transparent 1px calc(100% / var(--strings, 4)));
+      opacity: 0.78;
     }
 
     .instrument-card h2 {
+      position: relative;
+      z-index: 1;
       margin: 0;
       color: var(--white);
-      font-size: clamp(26px, 5vw, 34px);
-      line-height: 1.1;
+      font-size: clamp(22px, 5.2vw, 32px);
+      line-height: 1.04;
       letter-spacing: -0.055em;
       text-shadow: 0 3px 0 #000;
     }
 
     .instrument-card small {
+      position: relative;
+      z-index: 1;
       display: block;
       margin-top: 8px;
       color: var(--green);
-      font-size: 17px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
       text-shadow: 0 2px 0 #000;
     }
 
+    .shape-guitar { --body-w:120px; --body-h:112px; --clip: polygon(50% 0, 63% 9%, 72% 28%, 96% 39%, 94% 61%, 78% 72%, 70% 96%, 50% 100%, 30% 96%, 22% 72%, 6% 61%, 4% 39%, 28% 28%, 37% 9%); --strings:6; --tone-a:#512713; --tone-b:#d37b34; --tone-c:#f4c277; --tone-d:#7e3617; }
+    .shape-bass { --body-w:104px; --body-h:126px; --clip: polygon(50% 0, 69% 16%, 78% 40%, 94% 51%, 80% 68%, 73% 96%, 50% 100%, 27% 96%, 20% 68%, 6% 51%, 22% 40%, 31% 16%); --strings:4; --tone-a:#25150f; --tone-b:#8b6034; --tone-c:#e2c98e; --tone-d:#65401e; }
+    .shape-violin { --body-w:104px; --body-h:126px; --clip: polygon(50% 0, 67% 9%, 77% 30%, 97% 43%, 77% 54%, 91% 79%, 66% 100%, 50% 90%, 34% 100%, 9% 79%, 23% 54%, 3% 43%, 23% 30%, 33% 9%); --strings:4; --tone-a:#4d1c12; --tone-b:#a94521; --tone-c:#ef9f57; --tone-d:#762b16; }
+    .shape-mandolin { --body-w:106px; --body-h:116px; --clip: polygon(50% 0, 72% 15%, 92% 47%, 98% 86%, 50% 100%, 2% 86%, 8% 47%, 28% 15%); --strings:8; --tone-a:#38190f; --tone-b:#9b552b; --tone-c:#e5a65e; --tone-d:#5d2814; }
+    .shape-balalaika { --body-w:142px; --body-h:104px; --clip: polygon(50% 2%, 98% 96%, 2% 96%); --body-radius:12px 12px 26px 26px; --strings:3; --tone-a:#6c3518; --tone-b:#d0924d; --tone-c:#f2d5a2; --tone-d:#8a5427; }
+    .shape-banjo { --body-w:112px; --body-h:112px; --body-radius:50%; --strings:5; --tone-a:#1d1712; --tone-b:#f1ead5; --tone-c:#c5ad81; --tone-d:#7e4e28; }
+    .shape-banjo .art::before { background: radial-gradient(circle, #f8f1db 0 43%, #bca67d 44% 53%, #211711 54% 58%, #8a5a35 59% 100%); }
+    .shape-cavaquinho { --body-w:96px; --body-h:102px; --strings:4; --tone-a:#523017; --tone-b:#c98642; --tone-c:#efc68c; --tone-d:#774018; }
+
     @media (max-width: 520px) {
-      .home { padding-inline: 12px; }
-      .instrument-grid { gap: 14px; }
-      .instrument-card { min-height: 236px; padding-top: 22px; }
-      .instrument-art { width: 120px; height: 120px; margin-bottom: 22px; }
-      .instrument-card h2 { font-size: 24px; }
-      .instrument-card small { font-size: 14px; }
+      .home { padding-inline: 10px; }
+      .hero h1 { font-size: 46px; }
+      .hero p { font-size: 14px; }
+      .instrument-grid { gap: 10px; }
+      .instrument-card { min-height: 222px; padding: 14px 8px; }
+      .art { width: 120px; height: 132px; margin-bottom: 14px; }
+      .art::before { transform: translateX(-50%) scale(0.78); transform-origin: bottom center; }
+      .neck { bottom: 66px; height: 66px; transform: translateX(-50%) scaleX(0.86); }
+      .head { bottom: 119px; transform: translateX(-50%) scale(0.82); }
+      .strings { bottom: 18px; height: 106px; transform: translateX(-50%) scaleX(0.8); }
+      .instrument-card h2 { font-size: 21px; }
+      .instrument-card small { font-size: 11px; }
     }
   </style>
 </head>
 <body>
   <main class="home">
+    <nav class="topbar" aria-label="Project links">
+      <div class="brand"><span class="brand-mark">t</span><span>instrument tuna</span></div>
+      <a class="github" href="https://github.com/magic-bunny/ukelele-helper" target="_blank" rel="noopener noreferrer" aria-label="Open project on GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.93.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 7c.85 0 1.7.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.23 10.23 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" /></svg>
+      </a>
+    </nav>
+
     <header class="hero">
-      <h1>Instrument Tuner</h1>
-      <p>Choose an instrument. Each tuner opens as its own page and keeps the same fast meter, pitch trail, and in-tune chime experience.</p>
+      <h1>Choose your tuner</h1>
+      <p>14 separate tuner pages inspired by your references. The stable ukulele tuner is preserved as its own page.</p>
     </header>
 
     <section class="instrument-grid" aria-label="Choose an instrument">
-      <a class="instrument-card" href="guitar.html" style="--tone-a:#211611;--tone-b:#c77835;--tone-c:#f2c17a;--angle:-18deg"><span class="instrument-art"></span><h2>Guitar</h2><small>E A D G B E</small></a>
-      <a class="instrument-card" href="bass.html" style="--tone-a:#12171a;--tone-b:#8a5a33;--tone-c:#d9b27a;--angle:12deg"><span class="instrument-art"></span><h2>Bass Guitar</h2><small>E A D G</small></a>
-      <a class="instrument-card" href="ukulele.html" style="--tone-a:#4a2612;--tone-b:#e38a3e;--tone-c:#121715;--angle:-24deg"><span class="instrument-art"></span><h2>Ukulele</h2><small>G C E A</small></a>
-      <a class="instrument-card" href="violin.html" style="--tone-a:#1b1212;--tone-b:#9f3e22;--tone-c:#f0a65f;--angle:-14deg"><span class="instrument-art"></span><h2>Violin/Fiddle</h2><small>G D A E</small></a>
-      <a class="instrument-card" href="viola.html" style="--tone-a:#5b321e;--tone-b:#bc6f3c;--tone-c:#211818;--angle:18deg"><span class="instrument-art"></span><h2>Viola</h2><small>C G D A</small></a>
-      <a class="instrument-card" href="cello.html" style="--tone-a:#241313;--tone-b:#b35d2c;--tone-c:#f2a65c;--angle:4deg"><span class="instrument-art"></span><h2>Cello</h2><small>C G D A</small></a>
-      <a class="instrument-card" href="double-bass.html" style="--tone-a:#17110f;--tone-b:#8e4d28;--tone-c:#d08b4c;--angle:7deg"><span class="instrument-art"></span><h2>Double Bass</h2><small>E A D G</small></a>
-      <a class="instrument-card" href="cavaquinho.html" style="--tone-a:#1d241f;--tone-b:#b97339;--tone-c:#e8c59a;--angle:-34deg"><span class="instrument-art"></span><h2>Cavaquinho</h2><small>D G B D</small></a>
-      <a class="instrument-card" href="mandolin.html" style="--tone-a:#140f12;--tone-b:#7c3d20;--tone-c:#d58b49;--angle:28deg"><span class="instrument-art"></span><h2>Mandolin</h2><small>G D A E</small></a>
-      <a class="instrument-card" href="balalaika.html" style="--tone-a:#263030;--tone-b:#c88b4b;--tone-c:#f2d2a1;--angle:42deg"><span class="instrument-art"></span><h2>Balalaika</h2><small>E E A</small></a>
-      <a class="instrument-card" href="banjo-4.html" style="--tone-a:#111;--tone-b:#eee;--tone-c:#762f23;--angle:-8deg"><span class="instrument-art"></span><h2>Banjo</h2><small>4-string</small></a>
-      <a class="instrument-card" href="banjo-5.html" style="--tone-a:#251a17;--tone-b:#d9c59e;--tone-c:#6d2d22;--angle:14deg"><span class="instrument-art"></span><h2>Banjo</h2><small>5-string</small></a>
-      <a class="instrument-card" href="bouzouki.html" style="--tone-a:#201715;--tone-b:#a65b2e;--tone-c:#dca56a;--angle:24deg"><span class="instrument-art"></span><h2>Bouzouki</h2><small>G D A D</small></a>
-      <a class="instrument-card" href="charango.html" style="--tone-a:#3b2517;--tone-b:#d0833c;--tone-c:#f4c886;--angle:-28deg"><span class="instrument-art"></span><h2>Charango</h2><small>G C E A E</small></a>
+      <a class="instrument-card shape-guitar" href="guitar-6.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Guitar</h2><small>E A D G B E</small></a>
+      <a class="instrument-card shape-guitar" href="guitar-7.html" style="--strings:7"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Guitar 7-string</h2><small>B E A D G B E</small></a>
+      <a class="instrument-card shape-guitar" href="guitar-12.html" style="--strings:12"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Guitar 12-string</h2><small>paired courses</small></a>
+      <a class="instrument-card shape-bass" href="bass-4.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Bass Guitar</h2><small>E A D G</small></a>
+      <a class="instrument-card shape-bass" href="bass-5.html" style="--strings:5"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Bass 5-string</h2><small>B E A D G</small></a>
+      <a class="instrument-card shape-cavaquinho" href="ukulele.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Ukulele</h2><small>G C E A</small></a>
+      <a class="instrument-card shape-violin" href="violin.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Violin/Fiddle</h2><small>G D A E</small></a>
+      <a class="instrument-card shape-violin" href="viola.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Viola</h2><small>C G D A</small></a>
+      <a class="instrument-card shape-violin" href="cello.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Cello</h2><small>C G D A</small></a>
+      <a class="instrument-card shape-cavaquinho" href="cavaquinho.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Cavaquinho</h2><small>D G B D</small></a>
+      <a class="instrument-card shape-mandolin" href="mandolin.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Mandolin</h2><small>G G D D A A E E</small></a>
+      <a class="instrument-card shape-balalaika" href="balalaika.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Balalaika</h2><small>E E A</small></a>
+      <a class="instrument-card shape-banjo" href="banjo-4.html" style="--strings:4"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Banjo</h2><small>4-string</small></a>
+      <a class="instrument-card shape-banjo" href="banjo-5.html"><span class="art"><i class="neck"></i><i class="head"></i><i class="strings"></i></span><h2>Banjo</h2><small>5-string</small></a>
     </section>
   </main>
 </body>

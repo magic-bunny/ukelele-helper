@@ -1,7 +1,6 @@
 const INSTRUMENTS = {
-
-  guitar: {
-    label: 'Guitar', brand: 'GUITAR', page: 'guitar.html',
+  'guitar-6': {
+    label: 'Guitar', brand: 'GUITAR', page: 'guitar-6.html', family: 'guitar', courses: 6,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
       { key: 'E', note: 'E2', freq: 82.41, hint: 'String 6' },
       { key: 'A', note: 'A2', freq: 110.00, hint: 'String 5' },
@@ -11,8 +10,37 @@ const INSTRUMENTS = {
       { key: 'E', note: 'E4', freq: 329.63, hint: 'String 1' }
     ] }]
   },
-  bass: {
-    label: 'Bass Guitar', brand: 'BASS', page: 'bass.html',
+  'guitar-7': {
+    label: 'Guitar 7-string', brand: 'GUITAR', page: 'guitar-7.html', family: 'guitar', courses: 7,
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'B', note: 'B1', freq: 61.74, hint: 'String 7' },
+      { key: 'E', note: 'E2', freq: 82.41, hint: 'String 6' },
+      { key: 'A', note: 'A2', freq: 110.00, hint: 'String 5' },
+      { key: 'D', note: 'D3', freq: 146.83, hint: 'String 4' },
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'String 3' },
+      { key: 'B', note: 'B3', freq: 246.94, hint: 'String 2' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'String 1' }
+    ] }]
+  },
+  'guitar-12': {
+    label: 'Guitar 12-string', brand: 'GUITAR', page: 'guitar-12.html', family: 'guitar', courses: 12,
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'E', note: 'E2', freq: 82.41, hint: 'Course 6 low' },
+      { key: 'E', note: 'E3', freq: 164.81, hint: 'Course 6 octave' },
+      { key: 'A', note: 'A2', freq: 110.00, hint: 'Course 5 low' },
+      { key: 'A', note: 'A3', freq: 220.00, hint: 'Course 5 octave' },
+      { key: 'D', note: 'D3', freq: 146.83, hint: 'Course 4 low' },
+      { key: 'D', note: 'D4', freq: 293.66, hint: 'Course 4 octave' },
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'Course 3 low' },
+      { key: 'G', note: 'G4', freq: 392.00, hint: 'Course 3 octave' },
+      { key: 'B', note: 'B3', freq: 246.94, hint: 'Course 2 pair' },
+      { key: 'B', note: 'B3', freq: 246.94, hint: 'Course 2 pair' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'Course 1 pair' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'Course 1 pair' }
+    ] }]
+  },
+  'bass-4': {
+    label: 'Bass Guitar', brand: 'BASS', page: 'bass-4.html', family: 'bass', courses: 4,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
       { key: 'E', note: 'E1', freq: 41.20, hint: 'String 4' },
       { key: 'A', note: 'A1', freq: 55.00, hint: 'String 3' },
@@ -20,53 +48,18 @@ const INSTRUMENTS = {
       { key: 'G', note: 'G2', freq: 98.00, hint: 'String 1' }
     ] }]
   },
-  'double-bass': {
-    label: 'Double Bass', brand: 'BASS', page: 'double-bass.html',
+  'bass-5': {
+    label: 'Bass Guitar 5-string', brand: 'BASS', page: 'bass-5.html', family: 'bass', courses: 5,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'B', note: 'B0', freq: 30.87, hint: 'String 5' },
       { key: 'E', note: 'E1', freq: 41.20, hint: 'String 4' },
       { key: 'A', note: 'A1', freq: 55.00, hint: 'String 3' },
       { key: 'D', note: 'D2', freq: 73.42, hint: 'String 2' },
       { key: 'G', note: 'G2', freq: 98.00, hint: 'String 1' }
     ] }]
-  },
-  bouzouki: {
-    label: 'Bouzouki', brand: 'BOUZ', page: 'bouzouki.html',
-    tunings: [{ id: 'irish', label: 'GDAD', strings: [
-      { key: 'G', note: 'G2', freq: 98.00, hint: 'Course 4' },
-      { key: 'D', note: 'D3', freq: 146.83, hint: 'Course 3' },
-      { key: 'A', note: 'A3', freq: 220.00, hint: 'Course 2' },
-      { key: 'D', note: 'D4', freq: 293.66, hint: 'Course 1' }
-    ] }]
-  },
-  charango: {
-    label: 'Charango', brand: 'CHAR', page: 'charango.html',
-    tunings: [{ id: 'standard', label: 'GCEAE', strings: [
-      { key: 'G', note: 'G4', freq: 392.00, hint: 'Course 5' },
-      { key: 'C', note: 'C5', freq: 523.25, hint: 'Course 4' },
-      { key: 'E', note: 'E5', freq: 659.25, hint: 'Course 3' },
-      { key: 'A', note: 'A4', freq: 440.00, hint: 'Course 2' },
-      { key: 'E', note: 'E5', freq: 659.25, hint: 'Course 1' }
-    ] }]
-  },
-  ukulele: {
-    label: 'Ukulele', brand: 'UKULELE', page: 'ukulele.html', accent: '#80dd00',
-    tunings: [
-      { id: 'high-g', label: 'High G', strings: [
-        { key: 'G', note: 'G4', freq: 392.00, hint: 'String 4, High G' },
-        { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
-        { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
-        { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
-      ] },
-      { id: 'low-g', label: 'Low G', strings: [
-        { key: 'G', note: 'G3', freq: 196.00, hint: 'String 4, Low G' },
-        { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
-        { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
-        { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
-      ] }
-    ]
   },
   violin: {
-    label: 'Violin/Fiddle', brand: 'VIOLIN', page: 'violin.html',
+    label: 'Violin/Fiddle', brand: 'VIOLIN', page: 'violin.html', family: 'violin', courses: 4,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
       { key: 'G', note: 'G3', freq: 196.00, hint: 'String 4' },
       { key: 'D', note: 'D4', freq: 293.66, hint: 'String 3' },
@@ -75,7 +68,7 @@ const INSTRUMENTS = {
     ] }]
   },
   viola: {
-    label: 'Viola', brand: 'VIOLA', page: 'viola.html',
+    label: 'Viola', brand: 'VIOLA', page: 'viola.html', family: 'violin', courses: 4,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
       { key: 'C', note: 'C3', freq: 130.81, hint: 'String 4' },
       { key: 'G', note: 'G3', freq: 196.00, hint: 'String 3' },
@@ -84,7 +77,7 @@ const INSTRUMENTS = {
     ] }]
   },
   cello: {
-    label: 'Cello', brand: 'CELLO', page: 'cello.html',
+    label: 'Cello', brand: 'CELLO', page: 'cello.html', family: 'cello', courses: 4,
     tunings: [{ id: 'standard', label: 'Standard', strings: [
       { key: 'C', note: 'C2', freq: 65.41, hint: 'String 4' },
       { key: 'G', note: 'G2', freq: 98.00, hint: 'String 3' },
@@ -93,7 +86,7 @@ const INSTRUMENTS = {
     ] }]
   },
   cavaquinho: {
-    label: 'Cavaquinho', brand: 'CAVAQ', page: 'cavaquinho.html',
+    label: 'Cavaquinho', brand: 'CAVAQ', page: 'cavaquinho.html', family: 'small-guitar', courses: 4,
     tunings: [{ id: 'standard', label: 'DGBD', strings: [
       { key: 'D', note: 'D4', freq: 293.66, hint: 'String 4' },
       { key: 'G', note: 'G4', freq: 392.00, hint: 'String 3' },
@@ -102,16 +95,20 @@ const INSTRUMENTS = {
     ] }]
   },
   mandolin: {
-    label: 'Mandolin', brand: 'MANDO', page: 'mandolin.html',
-    tunings: [{ id: 'standard', label: 'GDAE', strings: [
-      { key: 'G', note: 'G3', freq: 196.00, hint: 'Course 4' },
-      { key: 'D', note: 'D4', freq: 293.66, hint: 'Course 3' },
-      { key: 'A', note: 'A4', freq: 440.00, hint: 'Course 2' },
-      { key: 'E', note: 'E5', freq: 659.25, hint: 'Course 1' }
+    label: 'Mandolin', brand: 'MANDO', page: 'mandolin.html', family: 'mandolin', courses: 8,
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'G course' },
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'G course' },
+      { key: 'D', note: 'D4', freq: 293.66, hint: 'D course' },
+      { key: 'D', note: 'D4', freq: 293.66, hint: 'D course' },
+      { key: 'A', note: 'A4', freq: 440.00, hint: 'A course' },
+      { key: 'A', note: 'A4', freq: 440.00, hint: 'A course' },
+      { key: 'E', note: 'E5', freq: 659.25, hint: 'E course' },
+      { key: 'E', note: 'E5', freq: 659.25, hint: 'E course' }
     ] }]
   },
   balalaika: {
-    label: 'Balalaika', brand: 'BALA', page: 'balalaika.html',
+    label: 'Balalaika', brand: 'BALA', page: 'balalaika.html', family: 'balalaika', courses: 3,
     tunings: [{ id: 'prima', label: 'Prima', strings: [
       { key: 'E', note: 'E4', freq: 329.63, hint: 'String 3' },
       { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
@@ -119,7 +116,7 @@ const INSTRUMENTS = {
     ] }]
   },
   'banjo-4': {
-    label: 'Banjo 4-string', brand: 'BANJO', page: 'banjo-4.html',
+    label: 'Banjo 4-string', brand: 'BANJO', page: 'banjo-4.html', family: 'banjo', courses: 4,
     tunings: [{ id: 'tenor', label: 'Tenor', strings: [
       { key: 'C', note: 'C3', freq: 130.81, hint: 'String 4' },
       { key: 'G', note: 'G3', freq: 196.00, hint: 'String 3' },
@@ -128,7 +125,7 @@ const INSTRUMENTS = {
     ] }]
   },
   'banjo-5': {
-    label: 'Banjo 5-string', brand: 'BANJO', page: 'banjo-5.html',
+    label: 'Banjo 5-string', brand: 'BANJO', page: 'banjo-5.html', family: 'banjo', courses: 5,
     tunings: [{ id: 'open-g', label: 'Open G', strings: [
       { key: 'g', note: 'G4', freq: 392.00, hint: '5th string' },
       { key: 'D', note: 'D3', freq: 146.83, hint: 'String 4' },
@@ -139,14 +136,62 @@ const INSTRUMENTS = {
   }
 };
 
+INSTRUMENTS.guitar = INSTRUMENTS['guitar-6'];
+INSTRUMENTS.bass = INSTRUMENTS['bass-4'];
+INSTRUMENTS.ukulele = { label: 'Ukulele', brand: 'UKULELE', page: 'ukulele.html', family: 'small-guitar', courses: 4, accent: '#80dd00', tunings: [
+  { id: 'high-g', label: 'High G', strings: [
+    { key: 'G', note: 'G4', freq: 392.00, hint: 'String 4, High G' },
+    { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
+    { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
+    { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
+  ] },
+  { id: 'low-g', label: 'Low G', strings: [
+    { key: 'G', note: 'G3', freq: 196.00, hint: 'String 4, Low G' },
+    { key: 'C', note: 'C4', freq: 261.63, hint: 'String 3' },
+    { key: 'E', note: 'E4', freq: 329.63, hint: 'String 2' },
+    { key: 'A', note: 'A4', freq: 440.00, hint: 'String 1' }
+  ] }
+] };
+INSTRUMENTS['double-bass'] = { label: 'Double Bass', brand: 'BASS', page: 'double-bass.html', family: 'cello', courses: 4, tunings: [{ id: 'standard', label: 'Standard', strings: [
+  { key: 'E', note: 'E1', freq: 41.20, hint: 'String 4' },
+  { key: 'A', note: 'A1', freq: 55.00, hint: 'String 3' },
+  { key: 'D', note: 'D2', freq: 73.42, hint: 'String 2' },
+  { key: 'G', note: 'G2', freq: 98.00, hint: 'String 1' }
+] }] };
+INSTRUMENTS.bouzouki = { label: 'Bouzouki', brand: 'BOUZ', page: 'bouzouki.html', family: 'mandolin', courses: 8, tunings: [{ id: 'irish', label: 'GDAD', strings: [
+  { key: 'G', note: 'G2', freq: 98.00, hint: 'G course' },
+  { key: 'G', note: 'G2', freq: 98.00, hint: 'G course' },
+  { key: 'D', note: 'D3', freq: 146.83, hint: 'D course' },
+  { key: 'D', note: 'D3', freq: 146.83, hint: 'D course' },
+  { key: 'A', note: 'A3', freq: 220.00, hint: 'A course' },
+  { key: 'A', note: 'A3', freq: 220.00, hint: 'A course' },
+  { key: 'D', note: 'D4', freq: 293.66, hint: 'D course' },
+  { key: 'D', note: 'D4', freq: 293.66, hint: 'D course' }
+] }] };
+INSTRUMENTS.charango = { label: 'Charango', brand: 'CHAR', page: 'charango.html', family: 'small-guitar', courses: 10, tunings: [{ id: 'standard', label: 'GCEAE', strings: [
+  { key: 'G', note: 'G4', freq: 392.00, hint: 'G course' },
+  { key: 'G', note: 'G4', freq: 392.00, hint: 'G course' },
+  { key: 'C', note: 'C5', freq: 523.25, hint: 'C course' },
+  { key: 'C', note: 'C5', freq: 523.25, hint: 'C course' },
+  { key: 'E', note: 'E5', freq: 659.25, hint: 'E course' },
+  { key: 'E', note: 'E4', freq: 329.63, hint: 'E course' },
+  { key: 'A', note: 'A4', freq: 440.00, hint: 'A course' },
+  { key: 'A', note: 'A4', freq: 440.00, hint: 'A course' },
+  { key: 'E', note: 'E5', freq: 659.25, hint: 'E course' },
+  { key: 'E', note: 'E5', freq: 659.25, hint: 'E course' }
+] }] };
+
 const instrumentId = document.body.dataset.instrument || new URLSearchParams(location.search).get('instrument') || 'ukulele';
 const instrument = INSTRUMENTS[instrumentId] || INSTRUMENTS.ukulele;
 document.body.classList.add(`instrument-${instrumentId}`);
+if (instrument.family) document.body.classList.add(`family-${instrument.family}`);
 document.title = `${instrument.label} Tuner`;
 document.documentElement.style.setProperty('--green', instrument.accent || '#80dd00');
 
 const tuningSwitch = document.querySelector('#tuningSwitch');
 const stringButtonsHost = document.querySelector('#stringButtons');
+const instrumentTitle = document.querySelector('#instrumentTitle');
+const tuningTitle = document.querySelector('#tuningTitle');
 const brandText = document.querySelector('#brandText');
 const noteName = document.querySelector('#noteName');
 const targetText = document.querySelector('#targetText');
@@ -160,6 +205,7 @@ const levelBars = [...document.querySelectorAll('.volume-signal span')];
 const scaleTicks = document.querySelector('#scaleTicks');
 const pitchTrail = document.querySelector('#pitchTrail');
 const trailContext = pitchTrail.getContext('2d');
+const headstock = document.querySelector('.headstock');
 
 let audioContext;
 let analyser;
@@ -429,14 +475,9 @@ function setActiveString(id) {
 
 function layoutStringButton(button, index, count) {
   const row = Math.floor(index / 2);
-  const top = count <= 3 ? 86 + row * 120 : 48 + row * 96;
+  const top = count >= 10 ? 42 + row * 42 : count >= 7 ? 42 + row * 56 : count >= 5 ? 50 + row * 72 : count <= 3 ? 86 + row * 120 : 58 + row * 96;
   button.style.top = `${top}px`;
-  if (count % 2 === 1 && index === count - 1) {
-    button.style.left = '50%';
-    button.style.right = 'auto';
-    button.style.transform = 'translateX(-50%)';
-    return;
-  }
+  button.style.transform = '';
   if (index % 2 === 0) {
     button.style.left = '0';
     button.style.right = 'auto';
@@ -482,6 +523,32 @@ function buildStringButtons() {
   });
   stringCards = [...stringButtonsHost.querySelectorAll('.note-button')];
   setActiveString(stringSet[0].id);
+  renderInstrumentVisual();
+}
+
+function renderInstrumentVisual() {
+  if (!headstock) return;
+  const count = stringSet.length;
+  headstock.dataset.strings = String(count);
+  headstock.querySelectorAll('.string, .peg').forEach((node) => node.remove());
+  const spacing = count <= 1 ? 0 : 68 / (count - 1);
+  for (let index = 0; index < count; index += 1) {
+    const x = 16 + spacing * index;
+    const string = document.createElement('div');
+    string.className = 'string';
+    string.style.setProperty('--x', `${x}%`);
+    string.style.setProperty('--string-weight', `${count >= 10 ? 1 : index < count / 2 ? 2.1 : 1.35}px`);
+    headstock.append(string);
+
+    const peg = document.createElement('div');
+    const side = index % 2 === 0 ? 'left' : 'right';
+    const row = Math.floor(index / 2);
+    const rows = Math.ceil(count / 2);
+    const top = 54 + row * (rows > 5 ? 32 : rows > 4 ? 38 : 56);
+    peg.className = `peg peg-${side}`;
+    peg.style.top = `${top}px`;
+    headstock.append(peg);
+  }
 }
 
 function buildTuningSwitch() {
@@ -502,6 +569,8 @@ function updateTuning(index) {
   manualString = null;
   buildTuningSwitch();
   buildStringButtons();
+  if (instrumentTitle) instrumentTitle.textContent = instrument.label;
+  if (tuningTitle) tuningTitle.textContent = instrument.tunings[tuningIndex].label;
   targetText.textContent = `${instrument.label} · ${instrument.tunings[tuningIndex].label}`;
   direction.textContent = 'Play an open string';
   tuneChimeArmed = true;

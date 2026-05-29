@@ -1,6 +1,6 @@
 # Instrument Tuner
 
-A lightweight, browser-based tuner for ukulele and other string instruments. Each instrument has its own tuner page with real-time microphone pitch detection, a cents meter, pitch trail notes, and an in-tune chime.
+A lightweight, browser-based tuner for ukulele and other string instruments. The home page links to 14 instrument-specific tuners, each with real-time microphone pitch detection, a cents meter, pitch trail notes, and an in-tune chime.
 
 ## Live Site
 
@@ -11,22 +11,24 @@ Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny
 ## Supported Instruments
 
 - Guitar
+- Guitar 7-string
+- Guitar 12-string
 - Bass Guitar
+- Bass Guitar 5-string
 - Ukulele
 - Violin/Fiddle
 - Viola
 - Cello
-- Double Bass
 - Cavaquinho
 - Mandolin
 - Balalaika
-- Banjo: 4-string and 5-string
-- Bouzouki
-- Charango
+- Banjo 4-string
+- Banjo 5-string
 
 ## Features
 
 - Separate tuner page per instrument
+- Stable standalone ukulele tuner page preserved from the first release
 - Real-time microphone pitch detection using the Web Audio API
 - Automatic string matching for each instrument tuning
 - Manual target lock by tapping a string button
