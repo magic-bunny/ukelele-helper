@@ -867,9 +867,9 @@
     let recentPitches = [];
     let lastGoodPitchAt = 0;
     let lastValidPitchAt = 0;
-    let lastTrailSegmentAt = 0;
     let lastTrailFrameAt = 0;
     let lastRms = 0;
+    let activeTrailSegment = null;
     let trailWidth = 0;
     let trailHeight = 0;
     let trailDpr = 1;
@@ -885,6 +885,7 @@
     const TICK_STEP_CENTS = 5;
     const PREAMP_GAIN = 2.2;
     const SUSTAIN_HOLD_MS = 2600;
+    const TRAIL_SPEED_PX_PER_MS = 0.026;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -985,45 +986,40 @@
       if (!trailWidth || !trailHeight) resizePitchTrail();
       if (!lastTrailFrameAt) lastTrailFrameAt = now;
 
-      const delta = clamp((now - lastTrailFrameAt) * 0.026 * trailDpr, 0, 2.6 * trailDpr);
+      const delta = clamp((now - lastTrailFrameAt) * TRAIL_SPEED_PX_PER_MS * trailDpr, 0, 2.6 * trailDpr);
       lastTrailFrameAt = now;
       if (delta <= 0) return;
 
       trailContext.save();
       trailContext.setTransform(1, 0, 0, 1, 0, 0);
       trailContext.globalCompositeOperation = 'source-over';
-      trailContext.drawImage(pitchTrail, 0, -delta);
-      trailContext.clearRect(0, trailHeight - delta - 4 * trailDpr, trailWidth, delta + 5 * trailDpr);
+      trailContext.drawImage(pitchTrail, 0, delta);
+      trailContext.clearRect(0, 0, trailWidth, delta + 5 * trailDpr);
       trailContext.globalCompositeOperation = 'destination-out';
       trailContext.fillStyle = 'rgba(0, 0, 0, 0.012)';
       trailContext.fillRect(0, 0, trailWidth, trailHeight);
       trailContext.restore();
     }
 
-    function drawPitchSegment(frequency, color, rms) {
-      if (!trailWidth || !trailHeight) resizePitchTrail();
+    function trailStartY() {
+      const stageRect = pitchTrail.getBoundingClientRect();
+      const scaleRect = scaleTicks.getBoundingClientRect();
+      return scaleRect.top - stageRect.top + scaleRect.height / 2;
+    }
 
-      const rect = pitchTrail.getBoundingClientRect();
-      const leftPad = 34;
-      const rightPad = 34;
-      const usableWidth = Math.max(1, rect.width - leftPad - rightPad);
-      const frequencyRatio = clamp((frequency - MIN_FREQUENCY) / (MAX_FREQUENCY - MIN_FREQUENCY), 0, 1);
-      const x = leftPad + frequencyRatio * usableWidth;
-      const y = rect.height - 34;
-      const length = clamp(34 + rms * 900, 34, 92);
-
+    function drawTrailLine(x, y, color, length, alpha = 0.84) {
       trailContext.save();
       trailContext.lineCap = 'round';
       trailContext.strokeStyle = color;
       trailContext.shadowColor = color;
       trailContext.shadowBlur = 12;
-      trailContext.globalAlpha = 0.85;
+      trailContext.globalAlpha = alpha;
       trailContext.lineWidth = 2;
       trailContext.beginPath();
       trailContext.moveTo(x - length / 2, y);
       trailContext.lineTo(x + length / 2, y);
       trailContext.stroke();
-      trailContext.globalAlpha = 0.28;
+      trailContext.globalAlpha = alpha * 0.3;
       trailContext.lineWidth = 6;
       trailContext.beginPath();
       trailContext.moveTo(x - length / 2, y);
@@ -1032,13 +1028,44 @@
       trailContext.restore();
     }
 
-    function maybeDrawPitchSegment(frequency, color, rms, now) {
+    function trailXForFrequency(frequency) {
+      if (!trailWidth || !trailHeight) resizePitchTrail();
+
+      const rect = pitchTrail.getBoundingClientRect();
+      const leftPad = 34;
+      const rightPad = 34;
+      const usableWidth = Math.max(1, rect.width - leftPad - rightPad);
+      const frequencyRatio = clamp((frequency - MIN_FREQUENCY) / (MAX_FREQUENCY - MIN_FREQUENCY), 0, 1);
+      return leftPad + frequencyRatio * usableWidth;
+    }
+
+    function updateTrailSegment(frequency, color, rms, now) {
       const isNewPluck = now - lastValidPitchAt > 360;
       const isAttack = rms > 0.004 && rms > lastRms * 1.35;
-      if ((isNewPluck || isAttack) && now - lastTrailSegmentAt > 180) {
-        drawPitchSegment(frequency, color, rms);
-        lastTrailSegmentAt = now;
+
+      if (isNewPluck || isAttack || !activeTrailSegment) {
+        activeTrailSegment = {
+          x: trailXForFrequency(frequency),
+          y: trailStartY(),
+          color,
+          startedAt: now,
+          lastDrawAt: now,
+          length: 12
+        };
+      } else {
+        activeTrailSegment.x = activeTrailSegment.x * 0.78 + trailXForFrequency(frequency) * 0.22;
+        activeTrailSegment.color = color;
       }
+
+      activeTrailSegment.length = clamp((now - activeTrailSegment.startedAt) * 0.12 + rms * 720, 18, 150);
+      drawTrailLine(
+        activeTrailSegment.x,
+        activeTrailSegment.y,
+        activeTrailSegment.color,
+        activeTrailSegment.length,
+        0.72
+      );
+      activeTrailSegment.lastDrawAt = now;
       lastValidPitchAt = now;
     }
 
@@ -1201,20 +1228,23 @@
           updateReadout(smoothedPitch);
           const target = getSelectedTarget(smoothedPitch);
           const cents = centsOff(smoothedPitch, target.freq);
-          maybeDrawPitchSegment(smoothedPitch, trailColorForCents(cents), rms, now);
+          updateTrailSegment(smoothedPitch, trailColorForCents(cents), rms, now);
         } else {
           direction.textContent = 'Play an open ukulele string';
           clearPointerState();
           recentPitches = [];
+          activeTrailSegment = null;
         }
       } else if (rms >= MIN_INPUT_RMS) {
         recentPitches = [];
+        activeTrailSegment = null;
         if (!holdRecentReading('Sustain fading, pluck again')) {
           direction.textContent = 'Signal found, play a clearer note';
           clearPointerState();
         }
       } else {
         recentPitches = [];
+        activeTrailSegment = null;
         if (!holdRecentReading('Sustain fading, pluck again')) {
           direction.textContent = 'Quiet input, move closer or pluck louder';
           clearPointerState();
@@ -1273,6 +1303,7 @@
       recentPitches = [];
       lastGoodPitchAt = 0;
       lastValidPitchAt = 0;
+      activeTrailSegment = null;
       direction.textContent = 'Play an open string';
       clearPointerState();
       updateLevel(0);
