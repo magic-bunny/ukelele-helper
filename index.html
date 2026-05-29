@@ -12,6 +12,9 @@
       --grid-strong: rgba(116, 156, 134, 0.22);
       --line: #f05a2b;
       --green: #80dd00;
+      --yellow: #ffd24a;
+      --red: #ff4d3f;
+      --needle-color: var(--green);
       --green-soft: rgba(128, 221, 0, 0.25);
       --white: #f6f8ef;
       --muted: rgba(246, 248, 239, 0.66);
@@ -177,66 +180,10 @@
       left: 50%;
       width: 2px;
       transform: translateX(-50%);
-      background: linear-gradient(transparent, rgba(121, 235, 105, 0.95) 16%, rgba(121, 235, 105, 0.95) 78%, transparent);
-      box-shadow: 0 0 14px rgba(121, 235, 105, 0.55);
-      z-index: 3;
-    }
-
-    .pitch-marker {
-      position: absolute;
-      left: 50%;
-      top: 34px;
-      width: 42px;
-      height: 42px;
-      transform: translateX(-50%);
-      transition: left 70ms ease-out;
+      background: linear-gradient(transparent, color-mix(in srgb, var(--needle-color) 92%, transparent) 16%, color-mix(in srgb, var(--needle-color) 92%, transparent) 78%, transparent);
+      box-shadow: 0 0 14px color-mix(in srgb, var(--needle-color) 54%, transparent);
+      transition: left 70ms ease-out, background 110ms ease, box-shadow 110ms ease;
       z-index: 6;
-    }
-
-    .pitch-marker::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border: 4px solid var(--white);
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.68);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 8px 22px rgba(0, 0, 0, 0.42);
-    }
-
-    .pitch-marker::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: -14px;
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 18px solid var(--white);
-      transform: translateX(-50%);
-      filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.45));
-    }
-
-    .pitch-marker.tuned::before {
-      border-color: var(--green);
-      background: var(--green);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.58), 0 0 28px rgba(128, 221, 0, 0.46);
-    }
-
-    .pitch-marker.tuned::after {
-      content: "✓";
-      left: 50%;
-      top: 50%;
-      bottom: auto;
-      width: auto;
-      height: auto;
-      border: 0;
-      color: #061004;
-      font-size: 24px;
-      font-weight: 900;
-      line-height: 1;
-      transform: translate(-50%, -50%);
-      filter: none;
     }
 
     .flat,
@@ -254,20 +201,27 @@
     .sharp { right: 32px; }
 
     .readout {
-      width: 100%;
-      padding: 0 14px;
+      position: absolute;
+      left: 50%;
+      top: -62px;
+      width: 190px;
+      padding: 0 8px;
+      transform: translateX(-50%);
+      transition: left 70ms ease-out, color 110ms ease;
       text-align: center;
-      color: var(--muted);
+      color: color-mix(in srgb, var(--needle-color) 72%, var(--white));
       font-size: 12px;
-      line-height: 1.45;
+      line-height: 1.35;
+      z-index: 8;
+      pointer-events: none;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.88);
     }
 
     .readout strong {
       display: block;
-      color: var(--white);
-      font-size: 24px;
+      color: currentColor;
+      font-size: 18px;
       line-height: 1.05;
-      margin-bottom: 2px;
     }
 
     .tuner-scale {
@@ -523,15 +477,6 @@
     .peg-3 { left: 18px; top: 206px; }
     .peg-4 { right: 18px; top: 206px; }
 
-    .bottom-panel {
-      position: absolute;
-      z-index: 12;
-      left: 50%;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      width: min(calc(100% - 28px), 360px);
-      transform: translateX(-50%);
-      pointer-events: none;
-    }
 
     .volume-signal {
       position: fixed;
@@ -626,30 +571,6 @@
         bottom: -148px;
       }
 
-      .pitch-marker {
-        top: 104px;
-        width: 56px;
-        height: 56px;
-      }
-
-      .pitch-marker::before {
-        border-width: 5px;
-      }
-
-      .pitch-marker::after {
-        bottom: -18px;
-        border-left-width: 10px;
-        border-right-width: 10px;
-        border-top-width: 23px;
-      }
-
-      .pitch-marker.tuned::after {
-        top: 50%;
-        bottom: auto;
-        border: 0;
-        font-size: 31px;
-      }
-
       .flat,
       .sharp {
         top: 266px;
@@ -660,12 +581,13 @@
       .sharp { right: 44px; }
 
       .readout {
-        width: 100%;
+        top: 96px;
+        width: 220px;
         font-size: 13px;
       }
 
       .readout strong {
-        font-size: 28px;
+        font-size: 24px;
       }
 
       .tuner-scale {
@@ -695,11 +617,6 @@
       .scale-labels {
         height: 30px;
         font-size: 15px;
-      }
-
-      .bottom-panel {
-        bottom: max(20px, env(safe-area-inset-bottom));
-        width: min(calc(100% - 40px), 420px);
       }
 
       .headstock-scene {
@@ -771,9 +688,14 @@
       </div>
 
       <section class="meter-zone" aria-live="polite">
-        <div class="center-line"></div>
-        <div class="pitch-marker" id="needle" aria-hidden="true"></div>
+        <div class="center-line" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
+          <div class="readout">
+            <strong id="noteName">—</strong>
+            <span id="targetText">Waiting for microphone</span><br />
+            <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
+            <span id="direction">Play an open string</span>
+          </div>
           <div class="scale-ticks" id="scaleTicks"></div>
           <div class="scale-labels">
             <span style="left: 25%">-50</span>
@@ -820,15 +742,6 @@
           <div class="string s2"></div>
           <div class="string s3"></div>
           <div class="string s4"></div>
-        </div>
-      </section>
-
-      <section class="bottom-panel" aria-live="polite">
-        <div class="readout">
-          <strong id="noteName">—</strong>
-          <span id="targetText">Waiting for microphone</span><br />
-          <span id="freqText">-- Hz</span> · <span><b id="centsText">0</b> cents</span><br />
-          <span id="direction">Play an open string</span>
         </div>
       </section>
 
@@ -949,9 +862,20 @@
 
     function holdRecentReading(message) {
       if (!hasRecentReading()) return false;
-      needle.classList.remove('tuned');
       direction.textContent = message;
       return true;
+    }
+
+    function setPointer(position, color) {
+      const left = `${position}%`;
+      needle.style.left = left;
+      readout.style.left = left;
+      document.documentElement.style.setProperty('--needle-color', color);
+    }
+
+    function clearPointerState() {
+      setPointer(50, 'var(--green)');
+      clearTickHighlight();
     }
 
     function getSelectedTarget(frequency) {
@@ -992,20 +916,20 @@
       const isInTune = Math.abs(cents) <= 5;
       const isNear = Math.abs(cents) <= 15;
       const isFar = Math.abs(cents) > METER_FADE_CENTS;
+      const pointerColor = isInTune ? 'var(--green)' : isNear ? 'var(--yellow)' : 'var(--red)';
+      const pointerPosition = meterPosition(limited);
 
       setActiveString(target.key);
       noteName.textContent = target.key;
       targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
       freqText.textContent = `${frequency.toFixed(2)} Hz`;
       centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-      needle.style.left = `${meterPosition(limited)}%`;
-      needle.classList.toggle('tuned', isInTune);
+      setPointer(pointerPosition, pointerColor);
       highlightTick(limited);
       lastGoodPitchAt = performance.now();
 
       if (isInTune) {
         direction.textContent = 'In tune';
-        needle.style.setProperty('--white', '#ffffff');
       } else if (cents < 0) {
         direction.textContent = isFar ? 'Very flat, tighten the string' : isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string';
       } else {
@@ -1098,23 +1022,20 @@
           updateReadout(smoothedPitch);
         } else {
           direction.textContent = 'Play an open ukulele string';
-          needle.classList.remove('tuned');
-          clearTickHighlight();
+          clearPointerState();
           recentPitches = [];
         }
       } else if (rms >= MIN_INPUT_RMS) {
         recentPitches = [];
         if (!holdRecentReading('Sustain fading, pluck again')) {
           direction.textContent = 'Signal found, play a clearer note';
-          needle.classList.remove('tuned');
-          clearTickHighlight();
+          clearPointerState();
         }
       } else {
         recentPitches = [];
         if (!holdRecentReading('Sustain fading, pluck again')) {
           direction.textContent = 'Quiet input, move closer or pluck louder';
-          needle.classList.remove('tuned');
-          clearTickHighlight();
+          clearPointerState();
         }
       }
 
@@ -1169,8 +1090,7 @@
       recentPitches = [];
       lastGoodPitchAt = 0;
       direction.textContent = 'Play an open string';
-      needle.classList.remove('tuned');
-      clearTickHighlight();
+      clearPointerState();
       updateLevel(0);
     }
 
@@ -1184,8 +1104,7 @@
           const target = stringSet.find((item) => item.key === manualString);
           setActiveString(target.key);
           noteName.textContent = target.key;
-          needle.classList.remove('tuned');
-          clearTickHighlight();
+          clearPointerState();
           targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
           direction.textContent = `${target.key} locked`;
         } else {
