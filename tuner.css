@@ -755,3 +755,46 @@
     left: calc(50% - min(50vw, 280px) + 146px);
   }
 }
+
+.instrument-violin .wood,
+.instrument-viola .wood {
+  clip-path: polygon(50% 0, 67% 12%, 76% 28%, 98% 42%, 73% 54%, 85% 77%, 62% 100%, 50% 90%, 38% 100%, 15% 77%, 27% 54%, 2% 42%, 24% 28%, 33% 12%);
+  border-radius: 42% 42% 46% 46%;
+}
+
+.instrument-cello .headstock,
+.instrument-double-bass .headstock {
+  width: 190px;
+  height: 392px;
+  bottom: 38px;
+}
+
+.instrument-cello .wood,
+.instrument-double-bass .wood {
+  width: 190px;
+  height: 392px;
+  clip-path: polygon(50% 0, 68% 10%, 82% 31%, 96% 43%, 82% 55%, 94% 78%, 70% 100%, 50% 91%, 30% 100%, 6% 78%, 18% 55%, 4% 43%, 18% 31%, 32% 10%);
+  border-radius: 45% 45% 49% 49%;
+}
+
+.instrument-guitar .wood,
+.instrument-bass .wood,
+.instrument-bouzouki .wood,
+.instrument-charango .wood,
+.instrument-cavaquinho .wood {
+  clip-path: polygon(50% 0, 68% 8%, 78% 30%, 98% 45%, 78% 58%, 86% 84%, 62% 100%, 50% 94%, 38% 100%, 14% 84%, 22% 58%, 2% 45%, 22% 30%, 32% 8%);
+  border-radius: 45% 45% 44% 44%;
+}
+
+.instrument-mandolin .wood,
+.instrument-balalaika .wood {
+  clip-path: polygon(50% 0, 73% 20%, 98% 88%, 50% 100%, 2% 88%, 27% 20%);
+  border-radius: 46% 46% 18% 18%;
+}
+
+.instrument-banjo-4 .wood,
+.instrument-banjo-5 .wood {
+  clip-path: circle(45% at 50% 54%);
+  background: radial-gradient(circle, #f7f1dc 0 38%, #b9a88a 39% 48%, #1f1712 49% 52%, #8a5a35 53%);
+  border-color: rgba(255, 255, 255, 0.72);
+}

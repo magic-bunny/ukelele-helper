@@ -10,14 +10,19 @@ Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny
 
 ## Supported Instruments
 
-- Ukulele: High G and Low G
+- Guitar
+- Bass Guitar
+- Ukulele
 - Violin/Fiddle
 - Viola
 - Cello
+- Double Bass
 - Cavaquinho
 - Mandolin
 - Balalaika
 - Banjo: 4-string and 5-string
+- Bouzouki
+- Charango
 
 ## Features
 

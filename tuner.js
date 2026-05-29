@@ -1,4 +1,53 @@
 const INSTRUMENTS = {
+
+  guitar: {
+    label: 'Guitar', brand: 'GUITAR', page: 'guitar.html',
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'E', note: 'E2', freq: 82.41, hint: 'String 6' },
+      { key: 'A', note: 'A2', freq: 110.00, hint: 'String 5' },
+      { key: 'D', note: 'D3', freq: 146.83, hint: 'String 4' },
+      { key: 'G', note: 'G3', freq: 196.00, hint: 'String 3' },
+      { key: 'B', note: 'B3', freq: 246.94, hint: 'String 2' },
+      { key: 'E', note: 'E4', freq: 329.63, hint: 'String 1' }
+    ] }]
+  },
+  bass: {
+    label: 'Bass Guitar', brand: 'BASS', page: 'bass.html',
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'E', note: 'E1', freq: 41.20, hint: 'String 4' },
+      { key: 'A', note: 'A1', freq: 55.00, hint: 'String 3' },
+      { key: 'D', note: 'D2', freq: 73.42, hint: 'String 2' },
+      { key: 'G', note: 'G2', freq: 98.00, hint: 'String 1' }
+    ] }]
+  },
+  'double-bass': {
+    label: 'Double Bass', brand: 'BASS', page: 'double-bass.html',
+    tunings: [{ id: 'standard', label: 'Standard', strings: [
+      { key: 'E', note: 'E1', freq: 41.20, hint: 'String 4' },
+      { key: 'A', note: 'A1', freq: 55.00, hint: 'String 3' },
+      { key: 'D', note: 'D2', freq: 73.42, hint: 'String 2' },
+      { key: 'G', note: 'G2', freq: 98.00, hint: 'String 1' }
+    ] }]
+  },
+  bouzouki: {
+    label: 'Bouzouki', brand: 'BOUZ', page: 'bouzouki.html',
+    tunings: [{ id: 'irish', label: 'GDAD', strings: [
+      { key: 'G', note: 'G2', freq: 98.00, hint: 'Course 4' },
+      { key: 'D', note: 'D3', freq: 146.83, hint: 'Course 3' },
+      { key: 'A', note: 'A3', freq: 220.00, hint: 'Course 2' },
+      { key: 'D', note: 'D4', freq: 293.66, hint: 'Course 1' }
+    ] }]
+  },
+  charango: {
+    label: 'Charango', brand: 'CHAR', page: 'charango.html',
+    tunings: [{ id: 'standard', label: 'GCEAE', strings: [
+      { key: 'G', note: 'G4', freq: 392.00, hint: 'Course 5' },
+      { key: 'C', note: 'C5', freq: 523.25, hint: 'Course 4' },
+      { key: 'E', note: 'E5', freq: 659.25, hint: 'Course 3' },
+      { key: 'A', note: 'A4', freq: 440.00, hint: 'Course 2' },
+      { key: 'E', note: 'E5', freq: 659.25, hint: 'Course 1' }
+    ] }]
+  },
   ukulele: {
     label: 'Ukulele', brand: 'UKULELE', page: 'ukulele.html', accent: '#80dd00',
     tunings: [
@@ -92,6 +141,7 @@ const INSTRUMENTS = {
 
 const instrumentId = document.body.dataset.instrument || new URLSearchParams(location.search).get('instrument') || 'ukulele';
 const instrument = INSTRUMENTS[instrumentId] || INSTRUMENTS.ukulele;
+document.body.classList.add(`instrument-${instrumentId}`);
 document.title = `${instrument.label} Tuner`;
 document.documentElement.style.setProperty('--green', instrument.accent || '#80dd00');
 
