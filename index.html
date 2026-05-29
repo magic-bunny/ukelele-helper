@@ -889,7 +889,7 @@
     const TRAIL_SPEED_PX_PER_MS = 0.026;
     const TRAIL_NOTE_LENGTH = 10;
     const TRAIL_MERGE_CENTS = 5;
-    const TRAIL_MERGE_MS = 900;
+    const TRAIL_MERGE_MS = 1400;
     const TRAIL_COLORS = {
       green: '#80dd00',
       yellow: '#ffd24a',
@@ -1038,26 +1038,10 @@
       trailContext.restore();
     }
 
-    function trailXForFrequency(frequency) {
+    function trailXForCents(cents) {
       if (!trailWidth || !trailHeight) resizePitchTrail();
-
       const rect = pitchTrail.getBoundingClientRect();
-      const leftPad = 34;
-      const rightPad = 34;
-      const usableWidth = Math.max(1, rect.width - leftPad - rightPad);
-      const frequencyRatio = clamp((frequency - MIN_FREQUENCY) / (MAX_FREQUENCY - MIN_FREQUENCY), 0, 1);
-      return leftPad + frequencyRatio * usableWidth;
-    }
-
-    function redrawTrailNote(note) {
-      const clearPad = 12;
-      trailContext.clearRect(
-        note.x - TRAIL_NOTE_LENGTH / 2 - clearPad,
-        note.y - clearPad,
-        TRAIL_NOTE_LENGTH + clearPad * 2,
-        clearPad * 2
-      );
-      drawTrailLine(note.x, note.y, note.color, TRAIL_NOTE_LENGTH, note.alpha);
+      return rect.width * (meterPosition(cents) / 100);
     }
 
     function quantizedTrailCents(cents) {
@@ -1069,8 +1053,6 @@
     }
 
     function updateTrailSegment(frequency, cents, color, rms, now) {
-      const isNewPluck = now - lastValidPitchAt > 360;
-      const isAttack = rms > 0.004 && rms > lastRms * 1.35;
       const bucket = quantizedTrailCents(cents);
       const target = getSelectedTarget(frequency);
       const recentNote = trailNotes.find((note) => (
@@ -1079,18 +1061,16 @@
         && now - note.updatedAt < TRAIL_MERGE_MS
       ));
 
-      if (recentNote && !isNewPluck && !isAttack) {
-        recentNote.x = recentNote.x * 0.82 + trailXForFrequency(frequency) * 0.18;
+      if (recentNote) {
+        // Merge repeated detections into the same tick note instead of drawing a dense stack.
         recentNote.color = color;
-        recentNote.alpha = Math.min(0.9, recentNote.alpha + 0.02);
         recentNote.updatedAt = now;
         activeTrailSegment = recentNote;
-        redrawTrailNote(recentNote);
-      } else if (isNewPluck || isAttack || !activeTrailSegment) {
+      } else {
         activeTrailSegment = {
           targetKey: target.key,
           bucket,
-          x: trailXForFrequency(frequency),
+          x: trailXForCents(bucket),
           y: trailStartY(),
           color,
           startedAt: now,
@@ -1101,14 +1081,8 @@
         };
         trailNotes.push(activeTrailSegment);
         drawTrailLine(activeTrailSegment.x, activeTrailSegment.y, color, TRAIL_NOTE_LENGTH, activeTrailSegment.alpha);
-      } else {
-        activeTrailSegment.x = activeTrailSegment.x * 0.78 + trailXForFrequency(frequency) * 0.22;
-        activeTrailSegment.color = color;
-        activeTrailSegment.updatedAt = now;
-        redrawTrailNote(activeTrailSegment);
       }
 
-      activeTrailSegment.length = TRAIL_NOTE_LENGTH;
       activeTrailSegment.lastDrawAt = now;
       lastValidPitchAt = now;
     }
