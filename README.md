@@ -2,6 +2,12 @@
 
 A lightweight, single-page ukulele tuner that runs directly in the browser. It listens through the microphone, detects the pitch of an open string, and shows whether the string is flat, sharp, or in tune.
 
+## Live Site
+
+Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny.github.io/ukelele-helper/)
+
+![Ukulele Helper screenshot](docs/screenshot.png)
+
 ## Features
 
 - Real-time microphone pitch detection using the Web Audio API
@@ -24,7 +30,7 @@ A lightweight, single-page ukulele tuner that runs directly in the browser. It l
 
 ## Usage
 
-1. Open `index.html` in a browser.
+1. Open the [live site](https://magic-bunny.github.io/ukelele-helper/) or `index.html` in a browser.
 2. Allow microphone access when prompted.
 3. Play one open string at a time.
 4. Follow the meter and text guidance:
@@ -59,8 +65,10 @@ http://localhost:8000
 
 ```text
 .
-├── index.html   # App markup, styles, and JavaScript
-└── README.md    # Project documentation
+├── docs/
+│   └── screenshot.png  # Site screenshot for README
+├── index.html          # App markup, styles, and JavaScript
+└── README.md           # Project documentation
 ```
 
 ## License
