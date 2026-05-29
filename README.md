@@ -1,6 +1,6 @@
 # Instrument Tuner
 
-A lightweight, browser-based tuner for ukulele and other string instruments. The home page links to 14 instrument-specific tuners, each with real-time microphone pitch detection, a cents meter, pitch trail notes, and an in-tune chime.
+A lightweight React single-page tuner for ukulele and other string instruments. The app uses one routed page for the home screen and 14 instrument tuner views with real-time microphone pitch detection, a cents meter, pitch trail notes, and an in-tune chime.
 
 ## Live Site
 
@@ -27,8 +27,8 @@ Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny
 
 ## Features
 
-- Separate tuner page per instrument
-- Stable standalone ukulele tuner page preserved from the first release
+- React single-page app with hash routes for GitHub Pages
+- Separate tuner view per instrument without separate duplicated HTML pages
 - Real-time microphone pitch detection using the Web Audio API
 - Automatic string matching for each instrument tuning
 - Manual target lock by tapping a string button
@@ -37,7 +37,6 @@ Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny
 - In-tune check icon and short chime
 - Input level indicator
 - Mobile-first responsive interface
-- No build step and no external runtime dependencies
 
 ## Usage
 
@@ -53,16 +52,15 @@ Use it here: [https://magic-bunny.github.io/ukelele-helper/](https://magic-bunny
 
 ## Local Development
 
-Because microphone access usually requires a secure context, run the page from `localhost` instead of opening the file directly if your browser blocks the microphone.
-
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-Then open:
+Build for GitHub Pages:
 
-```text
-http://localhost:8000
+```bash
+npm run build
 ```
 
 ## Browser Notes
@@ -78,10 +76,13 @@ http://localhost:8000
 .
 ├── docs/
 │   └── screenshot.png  # Site screenshot for README
-├── index.html          # Instrument picker home page
-├── tuner.css           # Shared tuner styling
-├── tuner.js            # Shared tuner logic and instrument configs
-├── *.html              # Individual instrument tuner pages
+├── public/             # Compatibility redirects for old instrument URLs
+├── src/
+│   ├── instruments.js  # Instrument tunings and display metadata
+│   ├── main.jsx        # React app, tuner logic, and hash routes
+│   └── styles.css      # App styling and instrument drawings
+├── index.html          # Vite entry point
+├── ukulele.html        # Preserved legacy stable ukulele page
 └── README.md           # Project documentation
 ```
 

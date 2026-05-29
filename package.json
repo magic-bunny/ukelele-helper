@@ -1,0 +1,32 @@
+{
+  "name": "ukelele-helper",
+  "version": "1.0.0",
+  "description": "React single-page instrument tuner for GitHub Pages",
+  "main": "src/main.jsx",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magic-bunny/ukelele-helper.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/magic-bunny/ukelele-helper/issues"
+  },
+  "homepage": "https://magic-bunny.github.io/ukelele-helper/",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "vite": "^8.0.14"
+  }
+}
