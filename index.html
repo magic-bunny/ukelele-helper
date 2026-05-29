@@ -261,6 +261,17 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.62);
       transform: translateX(-50%);
+      transition: height 90ms ease, opacity 90ms ease, background 90ms ease, box-shadow 90ms ease;
+    }
+
+    .scale-ticks .minor {
+      width: 1px;
+      height: 7px;
+    }
+
+    .scale-ticks .mid {
+      height: 16px;
+      background: rgba(255, 255, 255, 0.66);
     }
 
     .scale-ticks .major {
@@ -275,6 +286,15 @@
       width: 3px;
       background: var(--green);
       box-shadow: 0 0 12px rgba(128, 221, 0, 0.5);
+    }
+
+    .scale-ticks .active-tick {
+      bottom: 4px;
+      height: 38px;
+      width: 3px;
+      opacity: 1 !important;
+      background: var(--green);
+      box-shadow: 0 0 14px rgba(128, 221, 0, 0.72);
     }
 
     .scale-labels {
@@ -693,25 +713,7 @@
         <div class="center-line"></div>
         <div class="pitch-marker" id="needle" aria-hidden="true"></div>
         <div class="tuner-scale" aria-hidden="true">
-          <div class="scale-ticks">
-            <span style="left: 0%; opacity: 0.05"></span>
-            <span style="left: 6.25%; opacity: 0.12"></span>
-            <span style="left: 12.5%; opacity: 0.22"></span>
-            <span style="left: 18.75%; opacity: 0.38"></span>
-            <span class="major" style="left: 25%"></span>
-            <span style="left: 31.25%"></span>
-            <span style="left: 37.5%"></span>
-            <span style="left: 43.75%"></span>
-            <span class="zero" style="left: 50%"></span>
-            <span style="left: 56.25%"></span>
-            <span style="left: 62.5%"></span>
-            <span style="left: 68.75%"></span>
-            <span class="major" style="left: 75%"></span>
-            <span style="left: 81.25%; opacity: 0.38"></span>
-            <span style="left: 87.5%; opacity: 0.22"></span>
-            <span style="left: 93.75%; opacity: 0.12"></span>
-            <span style="left: 100%; opacity: 0.05"></span>
-          </div>
+          <div class="scale-ticks" id="scaleTicks"></div>
           <div class="scale-labels">
             <span style="left: 25%">-50</span>
             <span style="left: 50%">0</span>
@@ -804,6 +806,7 @@
     const levelBars = [...document.querySelectorAll('.volume-signal span')];
     const gFreq = document.querySelector('#gFreq');
     const stringCards = [...document.querySelectorAll('.note-button')];
+    const scaleTicks = document.querySelector('#scaleTicks');
 
     let audioContext;
     let analyser;
@@ -823,6 +826,8 @@
     const METER_RANGE_CENTS = 100;
     const METER_FADE_CENTS = 50;
     const METER_TRAVEL_PERCENT = 48;
+    const TICK_STEP_CENTS = 5;
+    let tickMarks = [];
 
     function centsOff(frequency, target) {
       return 1200 * Math.log2(frequency / target);
@@ -830,6 +835,47 @@
 
     function clamp(value, min, max) {
       return Math.min(max, Math.max(min, value));
+    }
+
+    function meterPosition(cents) {
+      const limited = clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS);
+      return 50 + limited * (METER_TRAVEL_PERCENT / METER_RANGE_CENTS);
+    }
+
+    function buildScaleTicks() {
+      const fragment = document.createDocumentFragment();
+
+      for (let cents = -METER_RANGE_CENTS; cents <= METER_RANGE_CENTS; cents += TICK_STEP_CENTS) {
+        const tick = document.createElement('span');
+        const distance = Math.abs(cents) / METER_RANGE_CENTS;
+        const opacity = 0.06 + (1 - Math.pow(distance, 1.65)) * 0.64;
+        tick.dataset.cents = String(cents);
+        tick.className = 'minor';
+        if (cents % 25 === 0) tick.className = 'mid';
+        if (cents % 50 === 0) tick.className = 'major';
+        if (cents === 0) tick.className = 'zero';
+        tick.style.left = `${meterPosition(cents)}%`;
+        tick.style.opacity = cents === 0 ? '1' : opacity.toFixed(2);
+        fragment.append(tick);
+      }
+
+      scaleTicks.append(fragment);
+      tickMarks = [...scaleTicks.querySelectorAll('span')];
+    }
+
+    function highlightTick(cents) {
+      const nearest = clamp(
+        Math.round(cents / TICK_STEP_CENTS) * TICK_STEP_CENTS,
+        -METER_RANGE_CENTS,
+        METER_RANGE_CENTS
+      );
+      tickMarks.forEach((tick) => {
+        tick.classList.toggle('active-tick', Number(tick.dataset.cents) === nearest);
+      });
+    }
+
+    function clearTickHighlight() {
+      tickMarks.forEach((tick) => tick.classList.remove('active-tick'));
     }
 
     function getSelectedTarget(frequency) {
@@ -841,6 +887,11 @@
         const distance = Math.abs(centsOff(frequency, item.freq));
         return distance < best.distance ? { item, distance } : best;
       }, { item: stringSet[0], distance: Infinity }).item;
+    }
+
+    function isNearUkuleleString(frequency) {
+      const target = getSelectedTarget(frequency);
+      return Math.abs(centsOff(frequency, target.freq)) <= METER_RANGE_CENTS;
     }
 
     function setActiveString(key) {
@@ -871,8 +922,9 @@
       targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
       freqText.textContent = `${frequency.toFixed(2)} Hz`;
       centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-      needle.style.left = `${50 + limited * (METER_TRAVEL_PERCENT / METER_RANGE_CENTS)}%`;
+      needle.style.left = `${meterPosition(limited)}%`;
       needle.classList.toggle('tuned', isInTune);
+      highlightTick(limited);
 
       if (isInTune) {
         direction.textContent = 'In tune';
@@ -964,15 +1016,24 @@
       const pitch = detectPitch(buffer, audioContext.sampleRate, rms);
 
       if (pitch) {
-        updateReadout(stablePitch(pitch));
+        const smoothedPitch = stablePitch(pitch);
+        if (isNearUkuleleString(smoothedPitch)) {
+          updateReadout(smoothedPitch);
+        } else {
+          direction.textContent = 'Play an open ukulele string';
+          needle.classList.remove('tuned');
+          clearTickHighlight();
+        }
       } else if (rms >= MIN_INPUT_RMS) {
         recentPitches = [];
         direction.textContent = 'Signal found, play a clearer note';
         needle.classList.remove('tuned');
+        clearTickHighlight();
       } else {
         recentPitches = [];
         direction.textContent = 'No clear input, move closer';
         needle.classList.remove('tuned');
+        clearTickHighlight();
       }
 
       rafId = requestAnimationFrame(loop);
@@ -1022,6 +1083,7 @@
       recentPitches = [];
       direction.textContent = 'Play an open string';
       needle.classList.remove('tuned');
+      clearTickHighlight();
       updateLevel(0);
     }
 
@@ -1036,6 +1098,7 @@
           setActiveString(target.key);
           noteName.textContent = target.key;
           needle.classList.remove('tuned');
+          clearTickHighlight();
           targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
           direction.textContent = `${target.key} locked`;
         } else {
@@ -1056,6 +1119,7 @@
       if (!mediaStream) startMic();
     }, { passive: true });
 
+    buildScaleTicks();
     startMic();
   </script>
 </body>
