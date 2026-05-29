@@ -450,19 +450,22 @@
 
     .nut {
       position: absolute;
-      left: 18px;
-      right: 18px;
+      left: 50%;
+      right: auto;
+      width: 122px;
       bottom: 78px;
       height: 12px;
       border-radius: 3px;
       background: linear-gradient(#fff9df, #d7c9a3);
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      transform: translateX(-50%);
     }
 
     .fretboard {
       position: absolute;
-      left: 18px;
-      right: 18px;
+      left: 50%;
+      right: auto;
+      width: 122px;
       bottom: -86px;
       height: 168px;
       border-radius: 0 0 12px 12px;
@@ -472,6 +475,7 @@
         linear-gradient(90deg, #2a1c12, #100b08 52%, #2b1a10);
       background-size: 100% 42px, auto, auto;
       box-shadow: inset 12px 0 16px rgba(255, 255, 255, 0.04), inset -12px 0 16px rgba(0, 0, 0, 0.26);
+      transform: translateX(-50%);
     }
 
     .string {
