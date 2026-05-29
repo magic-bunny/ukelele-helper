@@ -866,6 +866,9 @@
     let stringSet = STRINGS_HIGH_G;
     let recentPitches = [];
     let lastGoodPitchAt = 0;
+    let tuneChimeArmed = true;
+    let lastChimeAt = 0;
+    let lastChimeTarget = null;
     let lastValidPitchAt = 0;
     let lastTrailFrameAt = 0;
     let lastRms = 0;
@@ -886,6 +889,7 @@
     const TICK_STEP_CENTS = 5;
     const PREAMP_GAIN = 2.2;
     const SUSTAIN_HOLD_MS = 2600;
+    const CHIME_COOLDOWN_MS = 1400;
     const TRAIL_SPEED_PX_PER_MS = 0.024;
     const TRAIL_NOTE_LENGTH = 20;
     const TRAIL_MERGE_CENTS = 5;
@@ -966,6 +970,38 @@
       setPointer(50, 'var(--green)');
       tuneIcon.classList.remove('in-tune');
       clearTickHighlight();
+    }
+
+    function playTuneChime(target, now) {
+      if (!audioContext || now - lastChimeAt < CHIME_COOLDOWN_MS) return;
+
+      const start = audioContext.currentTime;
+      const master = audioContext.createGain();
+      const notes = [target.freq * 2, target.freq * 3].map((freq) => clamp(freq, 520, 1760));
+      master.gain.setValueAtTime(0.0001, start);
+      master.gain.exponentialRampToValueAtTime(0.055, start + 0.018);
+      master.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+      master.connect(audioContext.destination);
+
+      notes.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const voice = audioContext.createGain();
+        oscillator.type = index === 0 ? 'sine' : 'triangle';
+        oscillator.frequency.setValueAtTime(freq, start);
+        voice.gain.setValueAtTime(index === 0 ? 0.72 : 0.32, start);
+        oscillator.connect(voice);
+        voice.connect(master);
+        oscillator.start(start + index * 0.035);
+        oscillator.stop(start + 0.26 + index * 0.035);
+        oscillator.addEventListener('ended', () => {
+          oscillator.disconnect();
+          voice.disconnect();
+        });
+      });
+
+      window.setTimeout(() => master.disconnect(), 420);
+      lastChimeAt = now;
+      lastChimeTarget = target.note;
     }
 
     function resizePitchTrail() {
@@ -1147,6 +1183,8 @@
       const pointerColor = pointerColorForCents(cents);
       const pointerPosition = meterPosition(limited);
 
+      if (target.note !== lastChimeTarget) tuneChimeArmed = true;
+
       setActiveString(target.key);
       noteName.textContent = target.key;
       targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
@@ -1158,11 +1196,16 @@
       lastGoodPitchAt = performance.now();
 
       if (isInTune) {
+        if (tuneChimeArmed) {
+          playTuneChime(target, performance.now());
+          tuneChimeArmed = false;
+        }
         direction.textContent = 'In tune';
-      } else if (cents < 0) {
-        direction.textContent = isFar ? 'Very flat, tighten the string' : isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string';
       } else {
-        direction.textContent = isFar ? 'Very sharp, loosen the string' : isNear ? 'A little sharp, loosen gently' : 'Sharp, loosen the string';
+        if (Math.abs(cents) > 9) tuneChimeArmed = true;
+        direction.textContent = cents < 0
+          ? isFar ? 'Very flat, tighten the string' : isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string'
+          : isFar ? 'Very sharp, loosen the string' : isNear ? 'A little sharp, loosen gently' : 'Sharp, loosen the string';
       }
     }
 
@@ -1328,6 +1371,7 @@
       recentPitches = [];
       lastGoodPitchAt = 0;
       lastValidPitchAt = 0;
+      tuneChimeArmed = true;
       activeTrailSegment = null;
       trailNotes = [];
       direction.textContent = 'Play an open string';
@@ -1343,6 +1387,7 @@
         manualString = manualString === card.dataset.string ? null : card.dataset.string;
         if (manualString) {
           const target = stringSet.find((item) => item.key === manualString);
+          tuneChimeArmed = true;
           setActiveString(target.key);
           noteName.textContent = target.key;
           clearPointerState();
