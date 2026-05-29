@@ -144,7 +144,7 @@
       width: 42px;
       height: 42px;
       transform: translateX(-50%);
-      transition: left 120ms ease-out;
+      transition: left 70ms ease-out;
       z-index: 6;
     }
 
@@ -820,6 +820,13 @@
     let manualString = null;
     let stringSet = STRINGS_HIGH_G;
     let recentPitches = [];
+    const MIN_INPUT_RMS = 0.0022;
+    const MIN_FREQUENCY = 150;
+    const MAX_FREQUENCY = 560;
+    const YIN_THRESHOLD = 0.24;
+    const MAX_YIN_VALUE = 0.58;
+    const PITCH_WINDOW = 3;
+    const METER_RANGE_CENTS = 50;
 
     function centsOff(frequency, target) {
       return 1200 * Math.log2(frequency / target);
@@ -859,25 +866,26 @@
     function updateReadout(frequency) {
       const target = getSelectedTarget(frequency);
       const cents = centsOff(frequency, target.freq);
-      const limited = clamp(cents, -50, 50);
+      const limited = clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS);
       const isInTune = Math.abs(cents) <= 5;
       const isNear = Math.abs(cents) <= 15;
+      const isFar = Math.abs(cents) > METER_RANGE_CENTS;
 
       setActiveString(target.key);
       noteName.textContent = target.key;
       targetText.textContent = `Target ${target.note} · ${target.freq.toFixed(2)} Hz`;
       freqText.textContent = `${frequency.toFixed(2)} Hz`;
       centsText.textContent = `${cents > 0 ? '+' : ''}${cents.toFixed(1)}`;
-      needle.style.left = `${50 + limited * 0.84}%`;
+      needle.style.left = `${50 + limited * (42 / METER_RANGE_CENTS)}%`;
       needle.classList.toggle('tuned', isInTune);
 
       if (isInTune) {
         direction.textContent = 'In tune';
         needle.style.setProperty('--white', '#ffffff');
       } else if (cents < 0) {
-        direction.textContent = isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string';
+        direction.textContent = isFar ? 'Very flat, tighten the string' : isNear ? 'A little flat, tighten gently' : 'Flat, tighten the string';
       } else {
-        direction.textContent = isNear ? 'A little sharp, loosen gently' : 'Sharp, loosen the string';
+        direction.textContent = isFar ? 'Very sharp, loosen the string' : isNear ? 'A little sharp, loosen gently' : 'Sharp, loosen the string';
       }
     }
 
@@ -898,12 +906,10 @@
     }
 
     function detectPitch(samples, sampleRate, rms) {
-      if (rms < 0.0035) return null;
+      if (rms < MIN_INPUT_RMS) return null;
 
-      const minFrequency = 170;
-      const maxFrequency = 520;
-      const minLag = Math.floor(sampleRate / maxFrequency);
-      const maxLag = Math.floor(sampleRate / minFrequency);
+      const minLag = Math.floor(sampleRate / MAX_FREQUENCY);
+      const maxLag = Math.floor(sampleRate / MIN_FREQUENCY);
       const yin = new Float32Array(maxLag + 1);
       let runningSum = 0;
 
@@ -920,7 +926,6 @@
 
       let bestLag = -1;
       let bestValue = Infinity;
-      const threshold = 0.18;
 
       for (let lag = minLag; lag <= maxLag; lag += 1) {
         if (yin[lag] < bestValue) {
@@ -928,7 +933,7 @@
           bestLag = lag;
         }
 
-        if (yin[lag] < threshold) {
+        if (yin[lag] < YIN_THRESHOLD) {
           while (lag + 1 <= maxLag && yin[lag + 1] < yin[lag]) {
             lag += 1;
           }
@@ -938,7 +943,7 @@
         }
       }
 
-      if (bestLag < 0 || bestValue > 0.42) return null;
+      if (bestLag < 0 || bestValue > MAX_YIN_VALUE) return null;
 
       // Parabolic interpolation makes the detected pitch less jumpy between sample indices.
       const prev = yin[bestLag - 1] ?? yin[bestLag];
@@ -952,7 +957,7 @@
 
     function stablePitch(pitch) {
       recentPitches.push(pitch);
-      if (recentPitches.length > 5) recentPitches.shift();
+      if (recentPitches.length > PITCH_WINDOW) recentPitches.shift();
       const sorted = [...recentPitches].sort((a, b) => a - b);
       return sorted[Math.floor(sorted.length / 2)];
     }
@@ -965,10 +970,12 @@
 
       if (pitch) {
         updateReadout(stablePitch(pitch));
-      } else if (rms >= 0.0035) {
+      } else if (rms >= MIN_INPUT_RMS) {
+        recentPitches = [];
         direction.textContent = 'Signal found, play a clearer note';
         needle.classList.remove('tuned');
       } else {
+        recentPitches = [];
         direction.textContent = 'No clear input, move closer';
         needle.classList.remove('tuned');
       }
@@ -998,7 +1005,7 @@
         }
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 8192;
+        analyser.fftSize = 4096;
         analyser.smoothingTimeConstant = 0;
         buffer = new Float32Array(analyser.fftSize);
         sourceNode.connect(analyser);
