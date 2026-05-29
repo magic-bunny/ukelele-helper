@@ -886,8 +886,8 @@
     const TICK_STEP_CENTS = 5;
     const PREAMP_GAIN = 2.2;
     const SUSTAIN_HOLD_MS = 2600;
-    const TRAIL_SPEED_PX_PER_MS = 0.026;
-    const TRAIL_NOTE_LENGTH = 10;
+    const TRAIL_SPEED_PX_PER_MS = 0.024;
+    const TRAIL_NOTE_LENGTH = 20;
     const TRAIL_MERGE_CENTS = 5;
     const TRAIL_COLORS = {
       green: '#80dd00',
@@ -987,7 +987,10 @@
 
     function scrollPitchTrail(now) {
       if (!trailWidth || !trailHeight) resizePitchTrail();
-      if (!lastTrailFrameAt) lastTrailFrameAt = now;
+      if (!lastTrailFrameAt) {
+        lastTrailFrameAt = now;
+        return;
+      }
 
       const delta = clamp((now - lastTrailFrameAt) * TRAIL_SPEED_PX_PER_MS, 0, 2.6);
       lastTrailFrameAt = now;
@@ -1007,21 +1010,27 @@
     }
 
     function drawTrailLine(x, y, color, length, alpha = 0.84) {
+      const tailLength = length * 1.9;
+      const gradient = trailContext.createLinearGradient(x, y - tailLength, x, y + length / 2);
+      gradient.addColorStop(0, 'rgba(128, 221, 0, 0)');
+      gradient.addColorStop(0.62, color);
+      gradient.addColorStop(1, color);
+
       trailContext.save();
       trailContext.lineCap = 'round';
-      trailContext.strokeStyle = color;
+      trailContext.strokeStyle = gradient;
       trailContext.shadowColor = color;
       trailContext.shadowBlur = 12;
       trailContext.globalAlpha = alpha;
       trailContext.lineWidth = 2;
       trailContext.beginPath();
-      trailContext.moveTo(x, y - length / 2);
+      trailContext.moveTo(x, y - tailLength);
       trailContext.lineTo(x, y + length / 2);
       trailContext.stroke();
-      trailContext.globalAlpha = alpha * 0.3;
+      trailContext.globalAlpha = alpha * 0.24;
       trailContext.lineWidth = 4;
       trailContext.beginPath();
-      trailContext.moveTo(x, y - length / 2);
+      trailContext.moveTo(x, y - tailLength);
       trailContext.lineTo(x, y + length / 2);
       trailContext.stroke();
       trailContext.restore();
