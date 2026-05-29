@@ -118,6 +118,51 @@
       background: var(--green);
     }
 
+    .site-links {
+      position: absolute;
+      z-index: 24;
+      top: 12px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .github-link {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.42);
+      color: rgba(255, 255, 255, 0.9);
+      opacity: 0.9;
+      transition: color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    }
+
+    .github-link:hover,
+    .github-link:focus-visible {
+      color: var(--green);
+      border-color: rgba(128, 221, 0, 0.58);
+      box-shadow: 0 0 18px rgba(128, 221, 0, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .github-link svg {
+      width: 21px;
+      height: 21px;
+      fill: currentColor;
+    }
+
+    .views-badge {
+      display: block;
+      height: 20px;
+      max-width: 96px;
+      opacity: 0.86;
+      filter: saturate(0.86);
+    }
+
     .meter-zone {
       position: absolute;
       inset: 38px 0 auto;
@@ -563,6 +608,11 @@
         left: calc(50% - min(50vw, 280px) + 14px);
       }
 
+      .site-links {
+        top: 20px;
+        right: calc(50% - min(50vw, 280px) + 14px);
+      }
+
       .meter-zone {
         position: absolute;
         inset: 46px 0 auto;
@@ -707,6 +757,17 @@
       <div class="tuning-switch" aria-label="G string mode">
         <button id="highG" class="active" type="button">High G</button>
         <button id="lowG" type="button">Low G</button>
+      </div>
+
+      <div class="site-links">
+        <a class="github-link" href="https://github.com/magic-bunny/ukelele-helper" target="_blank" rel="noopener noreferrer" aria-label="Open project on GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.93.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 7c.85 0 1.7.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.23 10.23 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+          </svg>
+        </a>
+        <a href="https://hits.sh/magic-bunny.github.io/ukelele-helper/" target="_blank" rel="noopener noreferrer" title="Page view counter">
+          <img class="views-badge" src="https://hits.sh/magic-bunny.github.io/ukelele-helper.svg?label=views&color=80dd00&labelColor=111811" alt="Page views" loading="lazy" />
+        </a>
       </div>
 
       <section class="meter-zone" aria-live="polite">
