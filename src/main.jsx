@@ -24,11 +24,82 @@ function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
 function meterPosition(cents) { return 50 + clamp(cents, -METER_RANGE_CENTS, METER_RANGE_CENTS) * (METER_TRAVEL_PERCENT / METER_RANGE_CENTS); }
 function pointerColorForCents(cents) { return Math.abs(cents) <= 5 ? 'var(--green)' : Math.abs(cents) <= 15 ? 'var(--yellow)' : 'var(--red)'; }
 function trailColorForCents(cents) { return Math.abs(cents) <= 5 ? TRAIL_COLORS.green : Math.abs(cents) <= 15 ? TRAIL_COLORS.yellow : TRAIL_COLORS.red; }
-function normalizeStringIds(strings) {
+const LAYOUTS = {
+  'guitar-6': [
+    ['left', 2], ['left', 1], ['left', 0], ['right', 0], ['right', 1], ['right', 2]
+  ],
+  'guitar-7': [
+    ['left', 2], ['left', 1], ['left', 0], ['right', 0], ['right', 1], ['right', 2], ['right', 3]
+  ],
+  'guitar-12': [
+    ['left', 5], ['left', 4], ['left', 3], ['left', 2], ['left', 1], ['left', 0],
+    ['right', 0], ['right', 1], ['right', 2], ['right', 3], ['right', 4], ['right', 5]
+  ],
+  'bass-4': [
+    ['left', 3], ['left', 2], ['left', 1], ['left', 0]
+  ],
+  'bass-5': [
+    ['left', 2], ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  ukulele: [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  violin: [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  viola: [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  cello: [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  cavaquinho: [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  mandolin: [
+    ['left', 3], ['left', 2], ['left', 1], ['left', 0], ['right', 0], ['right', 1], ['right', 2], ['right', 3]
+  ],
+  balalaika: [
+    ['left', 0], ['left', 1], ['left', 2]
+  ],
+  'banjo-4': [
+    ['left', 1], ['left', 0], ['right', 0], ['right', 1]
+  ],
+  'banjo-5': [
+    ['left', 0], ['left', 1], ['left', 2], ['right', 0], ['right', 1]
+  ]
+};
+
+function normalizeStringIds(strings, instrumentId) {
   const counts = {};
-  return strings.map((item) => {
+  const layout = LAYOUTS[instrumentId] || [];
+  const maxRow = Math.max(0, ...layout.map((item) => item?.[1] || 0));
+  const custom = {
+    ukulele: { buttonTopBase: 68, buttonSpacing: 114, pegTopBase: 88, pegSpacing: 118 },
+    'bass-4': { buttonTopBase: 58, buttonSpacing: 72, pegTopBase: 64, pegSpacing: 58 },
+    balalaika: { buttonTopBase: 88, buttonSpacing: 58, pegTopBase: 74, pegSpacing: 58 },
+    violin: { buttonTopBase: 116, buttonSpacing: 62, pegTopBase: 80, pegSpacing: 48 },
+    viola: { buttonTopBase: 116, buttonSpacing: 62, pegTopBase: 80, pegSpacing: 48 },
+    cello: { buttonTopBase: 116, buttonSpacing: 62, pegTopBase: 80, pegSpacing: 48 }
+  }[instrumentId] || {};
+  const buttonSpacing = custom.buttonSpacing ?? (strings.length >= 10 ? 36 : strings.length >= 7 ? 52 : strings.length >= 5 ? 70 : strings.length <= 3 ? 58 : 96);
+  const buttonTopBase = custom.buttonTopBase ?? (strings.length <= 3 ? 110 : strings.length >= 10 ? 48 : strings.length >= 7 ? 56 : strings.length >= 5 ? 78 : 76);
+  const pegSpacing = custom.pegSpacing ?? (strings.length >= 10 ? 29 : strings.length >= 7 ? 39 : strings.length >= 5 ? 48 : strings.length <= 3 ? 58 : 56);
+  const pegTopBase = custom.pegTopBase ?? (strings.length <= 3 ? 90 : strings.length >= 10 ? 50 : strings.length >= 7 ? 58 : strings.length >= 5 ? 72 : 72);
+  return strings.map((item, index) => {
     counts[item.note] = (counts[item.note] || 0) + 1;
-    return { ...item, id: `${item.note}-${counts[item.note]}` };
+    const [side, row] = layout[index] || [index % 2 === 0 ? 'left' : 'right', Math.floor(index / 2)];
+    return {
+      ...item,
+      id: `${item.note}-${counts[item.note]}`,
+      buttonLayout: {
+        side,
+        row,
+        maxRow,
+        buttonTop: buttonTopBase + row * buttonSpacing,
+        pegTop: pegTopBase + row * pegSpacing
+      }
+    };
   });
 }
 function hashToId() {
@@ -58,7 +129,7 @@ function Home() {
       </nav>
       <header className="hero">
         <h1>Choose your tuner</h1>
-        <p>14 React-powered tuner pages in one app. Each instrument keeps its own visual shape, string layout, meter, pitch trail, and chime.</p>
+        <p>Choose an instrument and tune one open string at a time.</p>
       </header>
       <section className="instrument-grid" aria-label="Choose an instrument">
         {instrumentList.map((instrument) => <InstrumentCard key={instrument.id} instrument={instrument} />)}
@@ -87,7 +158,7 @@ function InstrumentThumb({ instrument }) {
 
 function Tuner({ id }) {
   const instrument = instruments[id] || instruments['guitar-6'];
-  const strings = useMemo(() => normalizeStringIds(instrument.strings), [instrument]);
+  const strings = useMemo(() => normalizeStringIds(instrument.strings, id), [instrument, id]);
   const [manualString, setManualString] = useState(null);
   const [reading, setReading] = useState(null);
   const [status, setStatus] = useState('Play an open string');
@@ -367,15 +438,13 @@ function ScaleTicks({ activeTick }) {
 }
 
 function NoteButton({ string, index, count, active, onClick }) {
-  const side = index % 2 === 0 ? 'left' : 'right';
-  const row = Math.floor(index / 2);
-  const rows = Math.ceil(count / 2);
-  const top = count >= 10 ? 42 + row * 42 : count >= 7 ? 42 + row * 56 : count >= 5 ? 50 + row * 72 : count <= 3 ? 86 + row * 120 : 58 + row * 96;
+  const layout = string.buttonLayout || fallbackLayout(index, count);
+  const side = layout.side;
+  const top = layout.buttonTop;
   return <button className={`note-button note-${side} ${active ? 'active' : ''}`} style={{ top }} onClick={onClick}><span>{string.key}</span></button>;
 }
 
 function InstrumentVisual({ instrument, strings }) {
-  const rows = Math.ceil(strings.length / 2);
   return (
     <>
       <div className="instrument-body" aria-hidden="true"><div className="body-shine" /><div className="soundhole" /><div className="tailpiece" /></div>
@@ -383,15 +452,23 @@ function InstrumentVisual({ instrument, strings }) {
         <div className="wood" /><div className="brand-text">{instrument.brand}</div><div className="nut" /><div className="fretboard" />
         {strings.map((string, index) => {
           const x = strings.length <= 1 ? 50 : 16 + (68 / (strings.length - 1)) * index;
-          const side = index % 2 === 0 ? 'left' : 'right';
-          const row = Math.floor(index / 2);
-          const top = 54 + row * (rows > 5 ? 32 : rows > 4 ? 38 : 56);
+          const layout = string.buttonLayout || fallbackLayout(index, strings.length);
+          const side = layout.side;
+          const top = layout.pegTop;
           const weight = strings.length >= 10 ? 1 : index < strings.length / 2 ? 2.1 : 1.35;
           return <React.Fragment key={string.id}><div className="string" style={{ '--x': `${x}%`, '--string-weight': `${weight}px` }} /><div className={`peg peg-${side}`} style={{ top }} /></React.Fragment>;
         })}
       </div>
     </>
   );
+}
+
+function fallbackLayout(index, count) {
+  const row = Math.floor(index / 2);
+  const rows = Math.ceil(count / 2);
+  const buttonTop = count >= 10 ? 42 + row * 42 : count >= 7 ? 42 + row * 56 : count >= 5 ? 50 + row * 72 : count <= 3 ? 86 + row * 120 : 58 + row * 96;
+  const pegTop = 54 + row * (rows > 5 ? 32 : rows > 4 ? 38 : 56);
+  return { side: index % 2 === 0 ? 'left' : 'right', buttonTop, pegTop };
 }
 
 function PitchTrail({ notes }) {
