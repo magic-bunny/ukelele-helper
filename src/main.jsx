@@ -76,7 +76,7 @@ function normalizeStringIds(strings, instrumentId) {
   const maxRow = Math.max(0, ...layout.map((item) => item?.[1] || 0));
   const custom = {
     ukulele: { buttonTopBase: 68, buttonSpacing: 114, pegTopBase: 88, pegSpacing: 118 },
-    'bass-4': { buttonTopBase: 58, buttonSpacing: 72, pegTopBase: 64, pegSpacing: 58 },
+    'bass-4': { buttonTopBase: 58, buttonSpacing: 72, pegTopBase: 62, pegSpacing: 74, stringXs: [34, 46, 58, 70] },
     balalaika: { buttonTopBase: 88, buttonSpacing: 58, pegTopBase: 74, pegSpacing: 58 },
     violin: { buttonTopBase: 116, buttonSpacing: 62, pegTopBase: 80, pegSpacing: 48 },
     viola: { buttonTopBase: 116, buttonSpacing: 62, pegTopBase: 80, pegSpacing: 48 },
@@ -98,7 +98,8 @@ function normalizeStringIds(strings, instrumentId) {
         maxRow,
         buttonTop: buttonTopBase + row * buttonSpacing,
         pegTop: pegTopBase + row * pegSpacing
-      }
+      },
+      stringX: custom.stringXs?.[index]
     };
   });
 }
@@ -458,12 +459,12 @@ function InstrumentVisual({ instrument, strings }) {
       <div className="headstock" aria-hidden="true" data-strings={strings.length}>
         <div className="wood" /><div className="brand-text">{instrument.brand}</div><div className="nut" /><div className="fretboard" />
         {strings.map((string, index) => {
-          const x = strings.length <= 1 ? 50 : 16 + (68 / (strings.length - 1)) * index;
+          const x = string.stringX ?? (strings.length <= 1 ? 50 : 16 + (68 / (strings.length - 1)) * index);
           const layout = string.buttonLayout || fallbackLayout(index, strings.length);
           const side = layout.side;
           const top = layout.pegTop;
           const weight = strings.length >= 10 ? 1 : index < strings.length / 2 ? 2.1 : 1.35;
-          return <React.Fragment key={string.id}><div className="string" style={{ '--x': `${x}%`, '--string-weight': `${weight}px` }} /><div className={`peg peg-${side}`} style={{ top }} /></React.Fragment>;
+          return <React.Fragment key={string.id}><div className="string" data-index={index} style={{ '--x': `${x}%`, '--string-weight': `${weight}px` }} /><div className={`peg peg-${side}`} data-index={index} style={{ top }} /></React.Fragment>;
         })}
       </div>
     </>

@@ -476,3 +476,169 @@ button {
 }
 .instrument-banjo-4 .brand-text,
 .instrument-banjo-5 .brand-text { color: rgba(255,246,214,0.75); }
+
+/* Bass 4 redraw: matches the supplied Fender-style reference more closely. */
+.instrument-bass-4 .instrument-body {
+  display: none;
+}
+
+.instrument-bass-4 .headstock {
+  width: 238px;
+  height: 548px;
+  bottom: -82px;
+  filter: drop-shadow(0 22px 24px rgba(0,0,0,0.58));
+}
+
+.instrument-bass-4 .wood {
+  width: 238px;
+  height: 548px;
+  clip-path: polygon(57% 0, 74% 1%, 89% 10%, 96% 25%, 91% 42%, 82% 54%, 72% 67%, 67% 82%, 67% 100%, 28% 100%, 28% 82%, 16% 75%, 11% 65%, 17% 50%, 23% 34%, 27% 18%, 39% 7%);
+  border: 0;
+  border-radius: 44% 48% 15% 20%;
+  background:
+    radial-gradient(ellipse at 67% 8%, rgba(255, 235, 191, 0.46), transparent 25%),
+    radial-gradient(ellipse at 35% 88%, rgba(143, 74, 24, 0.22), transparent 36%),
+    repeating-linear-gradient(101deg, rgba(140, 87, 39, 0.11) 0 1px, transparent 1px 12px),
+    linear-gradient(91deg, #d48d45 0%, #f2c283 34%, #f7d19a 52%, #e1a862 77%, #c67c34 100%);
+  box-shadow:
+    inset 12px 0 20px rgba(105, 48, 12, 0.24),
+    inset -10px 0 22px rgba(129, 67, 18, 0.18),
+    0 0 0 1px rgba(255, 229, 174, 0.28);
+}
+
+.instrument-bass-4 .wood::before {
+  content: "";
+  position: absolute;
+  inset: 4px 14px 0 18px;
+  clip-path: inherit;
+  background:
+    repeating-linear-gradient(104deg, transparent 0 17px, rgba(106, 65, 25, 0.09) 18px 20px),
+    radial-gradient(ellipse at 60% 20%, rgba(255,255,255,0.22), transparent 36%);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.instrument-bass-4 .brand-text {
+  display: none;
+}
+
+.instrument-bass-4 .nut {
+  left: 64px;
+  right: 78px;
+  bottom: 132px;
+  height: 10px;
+  background: linear-gradient(#dbe3df, #aeb8b5 48%, #f8fbf5 52%, #b9c1bd);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.44), 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.instrument-bass-4 .fretboard {
+  left: 61px;
+  right: 76px;
+  bottom: -122px;
+  height: 256px;
+  border-radius: 0;
+  background:
+    linear-gradient(rgba(238, 238, 225, 0.7) 2px, transparent 2px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 8px),
+    linear-gradient(90deg, #2d2724, #58493f 48%, #332b28);
+  background-size: 100% 80px, auto, auto;
+  box-shadow: inset 7px 0 8px rgba(255,255,255,0.05), inset -8px 0 9px rgba(0,0,0,0.33);
+}
+
+.instrument-bass-4 .fretboard::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 112px;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(222, 222, 206, 0.72);
+  box-shadow: 0 79px 0 rgba(222,222,206,0.72);
+}
+
+.instrument-bass-4 .string {
+  top: 82px;
+  bottom: -122px;
+  width: 2.2px;
+  background:
+    linear-gradient(90deg, rgba(40,40,38,0.42), transparent 42%, rgba(255,255,255,0.72) 50%, rgba(80,80,78,0.48));
+  box-shadow: 1px 0 0 rgba(0,0,0,0.46), 0 0 2px rgba(255,255,255,0.38);
+}
+
+.instrument-bass-4 .peg {
+  left: auto;
+  right: auto;
+  width: 34px;
+  height: 34px;
+  border-width: 2px;
+  background:
+    radial-gradient(circle at 36% 32%, #ffffff 0 12%, #d8e0df 13% 24%, #79817f 25% 42%, #eef4f1 43% 60%, #606765 61% 74%, #dbe2de 75%);
+  box-shadow: inset -3px -4px 8px rgba(0,0,0,0.38), inset 3px 3px 6px rgba(255,255,255,0.46), 0 3px 8px rgba(0,0,0,0.44);
+}
+
+.instrument-bass-4 .peg::before {
+  top: 14px;
+  left: -58px;
+  width: 62px;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #58605f, #eef4ef 50%, #717978);
+  transform: rotate(8deg);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+
+.instrument-bass-4 .peg::after {
+  left: -95px;
+  top: -17px;
+  width: 58px;
+  height: 64px;
+  border-radius: 48% 48% 44% 44%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,0.92), transparent 18%),
+    linear-gradient(135deg, #eef4f1, #8e9897 45%, #465150 78%, #cfd8d6);
+  clip-path: polygon(49% 0, 70% 9%, 77% 30%, 100% 45%, 82% 67%, 61% 70%, 50% 100%, 39% 70%, 18% 67%, 0 45%, 23% 30%, 30% 9%);
+  box-shadow: inset 5px 5px 8px rgba(255,255,255,0.5), inset -6px -6px 10px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.48);
+}
+
+.instrument-bass-4 .peg[data-index="0"] { left: 127px; top: 62px !important; }
+.instrument-bass-4 .peg[data-index="1"] { left: 103px; top: 165px !important; }
+.instrument-bass-4 .peg[data-index="2"] { left: 82px; top: 274px !important; }
+.instrument-bass-4 .peg[data-index="3"] { left: 60px; top: 381px !important; }
+
+.instrument-bass-4 .peg[data-index="0"]::before { transform: rotate(8deg); }
+.instrument-bass-4 .peg[data-index="1"]::before { transform: rotate(10deg); }
+.instrument-bass-4 .peg[data-index="2"]::before { transform: rotate(13deg); }
+.instrument-bass-4 .peg[data-index="3"]::before { transform: rotate(15deg); }
+
+.instrument-bass-4 .string[data-index="0"] { top: 97px; }
+.instrument-bass-4 .string[data-index="1"] { top: 200px; }
+.instrument-bass-4 .string[data-index="2"] { top: 309px; }
+.instrument-bass-4 .string[data-index="3"] { top: 416px; }
+
+.instrument-bass-4 .headstock::after {
+  content: "";
+  position: absolute;
+  left: 80px;
+  top: 315px;
+  width: 90px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(#e5e7de, #7d8582 44%, #eef0e8 48%, #69706e);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.5);
+  z-index: 12;
+}
+
+.instrument-bass-4 .headstock::before {
+  content: "✦  ✦";
+  position: absolute;
+  left: 101px;
+  top: 315px;
+  z-index: 13;
+  color: #252929;
+  font-size: 13px;
+  letter-spacing: 18px;
+  line-height: 18px;
+  text-shadow: 0 1px rgba(255,255,255,0.5);
+}
