@@ -108,6 +108,13 @@ function hashToId() {
 }
 function goHome() { window.location.hash = '/'; }
 function goTuner(id) { window.location.hash = `/tuner/${id}`; }
+function openInstrument(id) {
+  if (id === 'ukulele') {
+    window.location.href = './ukulele.html';
+    return;
+  }
+  goTuner(id);
+}
 
 function useHashRoute() {
   const [route, setRoute] = useState(hashToId());
@@ -140,7 +147,7 @@ function Home() {
 
 function InstrumentCard({ instrument }) {
   return (
-    <button className={`instrument-card shape-${instrument.shape}`} onClick={() => goTuner(instrument.id)}>
+    <button className={`instrument-card shape-${instrument.shape}`} onClick={() => openInstrument(instrument.id)}>
       <InstrumentThumb instrument={instrument} />
       <h2>{instrument.short}</h2>
       <small>{instrument.summary}</small>
@@ -481,6 +488,10 @@ function GitHubIcon() {
 
 function App() {
   const routeId = useHashRoute();
+  useEffect(() => {
+    if (routeId === 'ukulele') window.location.replace('./ukulele.html');
+  }, [routeId]);
+  if (routeId === 'ukulele') return null;
   return routeId && instruments[routeId] ? <Tuner id={routeId} /> : <Home />;
 }
 
