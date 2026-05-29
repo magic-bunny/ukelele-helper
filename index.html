@@ -811,13 +811,15 @@
     let audioContext;
     let analyser;
     let sourceNode;
+    let gainNode;
     let mediaStream;
     let rafId;
     let buffer;
     let manualString = null;
     let stringSet = STRINGS_HIGH_G;
     let recentPitches = [];
-    const MIN_INPUT_RMS = 0.0022;
+    let lastGoodPitchAt = 0;
+    const MIN_INPUT_RMS = 0.0009;
     const MIN_FREQUENCY = 150;
     const MAX_FREQUENCY = 560;
     const YIN_THRESHOLD = 0.24;
@@ -827,6 +829,8 @@
     const METER_FADE_CENTS = 50;
     const METER_TRAVEL_PERCENT = 48;
     const TICK_STEP_CENTS = 5;
+    const PREAMP_GAIN = 2.2;
+    const SUSTAIN_HOLD_MS = 2600;
     let tickMarks = [];
 
     function centsOff(frequency, target) {
@@ -878,6 +882,17 @@
       tickMarks.forEach((tick) => tick.classList.remove('active-tick'));
     }
 
+    function hasRecentReading() {
+      return lastGoodPitchAt && performance.now() - lastGoodPitchAt < SUSTAIN_HOLD_MS;
+    }
+
+    function holdRecentReading(message) {
+      if (!hasRecentReading()) return false;
+      needle.classList.remove('tuned');
+      direction.textContent = message;
+      return true;
+    }
+
     function getSelectedTarget(frequency) {
       if (manualString) {
         return stringSet.find((item) => item.key === manualString);
@@ -925,6 +940,7 @@
       needle.style.left = `${meterPosition(limited)}%`;
       needle.classList.toggle('tuned', isInTune);
       highlightTick(limited);
+      lastGoodPitchAt = performance.now();
 
       if (isInTune) {
         direction.textContent = 'In tune';
@@ -945,7 +961,7 @@
     }
 
     function updateLevel(rms) {
-      const percent = clamp((rms / 0.08) * 100, 0, 100);
+      const percent = clamp((rms / 0.045) * 100, 0, 100);
       const activeBars = Math.ceil(percent / 25);
       levelBars.forEach((bar, index) => {
         bar.classList.toggle('active', index < activeBars);
@@ -1023,17 +1039,22 @@
           direction.textContent = 'Play an open ukulele string';
           needle.classList.remove('tuned');
           clearTickHighlight();
+          recentPitches = [];
         }
       } else if (rms >= MIN_INPUT_RMS) {
         recentPitches = [];
-        direction.textContent = 'Signal found, play a clearer note';
-        needle.classList.remove('tuned');
-        clearTickHighlight();
+        if (!holdRecentReading('Sustain fading, pluck again')) {
+          direction.textContent = 'Signal found, play a clearer note';
+          needle.classList.remove('tuned');
+          clearTickHighlight();
+        }
       } else {
         recentPitches = [];
-        direction.textContent = 'No clear input, move closer';
-        needle.classList.remove('tuned');
-        clearTickHighlight();
+        if (!holdRecentReading('Sustain fading, pluck again')) {
+          direction.textContent = 'Quiet input, move closer or pluck louder';
+          needle.classList.remove('tuned');
+          clearTickHighlight();
+        }
       }
 
       rafId = requestAnimationFrame(loop);
@@ -1060,11 +1081,14 @@
           await audioContext.resume();
         }
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = PREAMP_GAIN;
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 4096;
         analyser.smoothingTimeConstant = 0;
         buffer = new Float32Array(analyser.fftSize);
-        sourceNode.connect(analyser);
+        sourceNode.connect(gainNode);
+        gainNode.connect(analyser);
         loop();
       } catch (error) {
         mediaStream = null;
@@ -1080,7 +1104,9 @@
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
       sourceNode = null;
+      gainNode = null;
       recentPitches = [];
+      lastGoodPitchAt = 0;
       direction.textContent = 'Play an open string';
       needle.classList.remove('tuned');
       clearTickHighlight();
